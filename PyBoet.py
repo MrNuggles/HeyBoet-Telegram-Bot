@@ -134,7 +134,18 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Video not found)')
 
             elif wType:  # Weather - Yahoo API
-                bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(weather coming soon!)')
+                yahoourl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woe" \
+                           "id%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode('utf-8') + "%27" \
+                           ")%20and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
+                result = urllib.urlopen(yahoourl).read()
+                data = json.loads(result)
+                if data['query']['count'] == 1:
+                    forcast = data['query']['results']['channel']['item']['condition']
+                    bot.sendMessage(chat_id=chat_id, text='Weather for ' + requestText + ':\n' + 'Temp: ' + forcast['temp'] + '\nConditions: ' + forcast['text'])
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
+
+                #bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(weather coming soon!)')
 
             elif xType:  # Porn Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&num=10&safe=off&cx=' + keyConfig.get\
