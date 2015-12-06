@@ -170,7 +170,8 @@ def echo(bot, update_id, keyConfig):
                 realUrl = dicurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['list']) >= 1:
-                    bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + data['list'][random.randint(0, len(data['list'])-1)]['definition'])
+                    resultNum = data['list'][random.randint(0, len(data['list'])-1)]
+                    bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + resultNum['definition'] + '\nExample:\n' + resultNum['example'])
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions here:\n' + realUrl)
             else:
