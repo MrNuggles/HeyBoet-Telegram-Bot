@@ -82,7 +82,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' +  (imagelink[:100] + '...' if len(imagelink) > 100 else imagelink))
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -93,7 +93,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendMessage(chat_id=chat_id, text=requestText + ': ' + imagelink)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
@@ -104,7 +104,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' +  (imagelink[:100] + '...' if len(imagelink) > 100 else imagelink))
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -115,7 +115,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -130,7 +130,7 @@ def echo(bot, update_id, keyConfig):
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Video not found)')
             elif wType:
-                bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(weather comming soon!)')
+                bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(weather coming soon!)')
             elif xType:
                 googurl = 'https://www.googleapis.com/customsearch/v1?&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_XSE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
