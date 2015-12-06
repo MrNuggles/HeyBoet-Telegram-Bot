@@ -82,7 +82,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=message + ': ' + imagelink[25:])
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -93,7 +93,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendMessage(chat_id=chat_id, text=message + ': ' + imagelink)
+                    bot.sendMessage(chat_id=chat_id, text=requestText + ': ' + imagelink)
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
@@ -104,7 +104,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=message + ': ' + imagelink[25:])
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -115,7 +115,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=message + ': ' + imagelink[25:])
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ': ' + imagelink[:25])
                 else:
                     # Reply to the message
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
