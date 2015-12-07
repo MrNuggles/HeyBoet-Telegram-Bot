@@ -82,6 +82,7 @@ def echo(bot, update_id, keyConfig):
             requestText = splitText[1]  # imagetext is input text
 
             if imageType:  # Image Search - GCSE API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
@@ -93,6 +94,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif gifType:  # GIF Search - GCSE API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
@@ -104,6 +106,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
 
             elif hugeType:  # Large Image Search - GCSE API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
@@ -115,6 +118,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif hugeGifType:  # Large GIF Search - GCSE API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=xlarge" + "&fileType=gif"
@@ -126,6 +130,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif vidType:  # Video Search - YouTube API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 vidurl = 'https://www.googleapis.com/youtube/v3/search?safeSearch=none&type=video&key=' + keyConfig.get\
                     ('Google', 'GCSE_APP_ID') + '&part=snippet&q='
                 realUrl = vidurl + requestText.encode('utf-8')
@@ -137,6 +142,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Video not found)')
 
             elif wType:  # Weather - Yahoo API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 yahoourl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woe" \
                            "id%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode('utf-8') + "%27" \
                            ")%20and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
@@ -149,6 +155,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
 
             elif xType:  # Porn Search - GCSE API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&num=10&safe=off&cx=' + keyConfig.get\
                     ('Google', 'GCSE_XSE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
@@ -167,30 +174,33 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, you\'re just too filthy.')
 
             elif dicType:  # Dictionary - DictionaryAPI.net
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 dicUrl = 'http://dictionaryapi.net/api/definition/'
                 realUrl = dicUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data) >= 1:
                     partOfSpeech = data[random.randint(0, len(data)-1)]
                     if len(partOfSpeech['Definitions']) >= 1:
-                        definitionText = partOfSpeech['Definitions'][random.randint(0, len(partOfSpeech['Definitions'])-1)]
-                        bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + partOfSpeech['PartOfSpeech'] + ".\n" + definitionText)
+                        definitionText = partOfSpeech['Definitions'][0]
+                        bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + partOfSpeech['PartOfSpeech'] + ".\n\n" + definitionText)
                     else:
-                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
+                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions for the word ' + requestText + '.')
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions for the word ' + requestText + '.')
 
             elif urbanDicType:  # Urban Dictionary - Urban API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 dicurl = 'http://api.urbandictionary.com/v0/define?term='
                 realUrl = dicurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['list']) >= 1:
                     resultNum = data['list'][random.randint(0, len(data['list'])-1)]
-                    bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + resultNum['definition'] + '\nExample:\n' + resultNum['example'])
+                    bot.sendMessage(chat_id=chat_id, text='Urban Definition For ' + requestText.title() + ":\n" + resultNum['definition'] + '\n\nExample:\n' + resultNum['example'])
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
 
             elif placeType:  # Google Maps Places API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.FIND_LOCATION)
                 mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
                 realUrl = mapsUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
