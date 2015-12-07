@@ -176,9 +176,9 @@ def echo(bot, update_id, keyConfig):
                         definitionText = partOfSpeech['Definitions'][random.randint(0, len(partOfSpeech['Definitions'])-1)]
                         bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + partOfSpeech['PartOfSpeech'] + ".\n" + definitionText)
                     else:
-                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + urllib.urlencode(realUrl))
+                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + urllib.urlencode(realUrl))
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
 
             elif urbanDicType:  # Urban Dictionary - Urban API
                 dicurl = 'http://api.urbandictionary.com/v0/define?term='
@@ -191,7 +191,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
 
             elif placeType:  # Google Maps Places API
-                mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&q='
+                mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
                 realUrl = mapsUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['results']) >= 1:
@@ -199,7 +199,7 @@ def echo(bot, update_id, keyConfig):
                     lngNum = data['results'][0]['geometry']['location']['lng']
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
