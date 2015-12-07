@@ -5,6 +5,7 @@ import urllib
 import urllib2
 import random
 import ConfigParser
+from mcstatus import MinecraftServer
 
 from time import sleep
 
@@ -77,7 +78,8 @@ def echo(bot, update_id, keyConfig):
             hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
             dicType = splitText[0].lower() == '/define'  # Command To Define A Word
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
-            placeType = splitText[0].lower() == '/place'  # Urban Dictionary Command
+            placeType = splitText[0].lower() == '/place'  # Google Map Command
+            mcType = splitText[0].lower() == '/mcstatus'  # Minecraft Server Status Command
 
             requestText = splitText[1]  # imagetext is input text
 
@@ -152,9 +154,12 @@ def echo(bot, update_id, keyConfig):
                     weather = data['query']['results']['channel']['item']['condition']
                     forecast = data['query']['results']['channel']['item']['forecast']
                     city = data['query']['results']['channel']['location']['city']
+                    astronomy = data['query']['results']['channel']['astronomy']
                     bot.sendMessage(chat_id=chat_id, text=('It is currently ' + weather['text'] + ' in ' + city + ' with a temperature of '
                                                            + weather['temp'] + 'C.\nA high of ' + forecast[0]['high'] + ' and a low of ' +
-                                                           forecast[0]['low'] + ' are expected during the day with conditions being ' + forecast[0]['text'] + '.'))
+                                                           forecast[0]['low'] + ' are expected during the day with conditions being ' +
+                                                           forecast[0]['text'] + '.\nSunrise: ' + astronomy['sunrise'] + '\nSunset: ' +
+                                                           astronomy['sunset']))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
 
@@ -214,7 +219,15 @@ def echo(bot, update_id, keyConfig):
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
-            else:
+
+            #elif mcType:  # mcstatus API
+            #    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+            #    server = MinecraftServer.lookup("41.86.100.15:10050")
+            #    status = server.status()
+            #    latency = server.ping()
+            #    query = server.query()
+            #    bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+            #else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
     return update_id
