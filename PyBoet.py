@@ -66,15 +66,15 @@ def echo(bot, update_id, keyConfig):
             if len(splitText) <= 1:
                 continue
 
-            wType = splitText[0] == '/getweather'  # Get Weather Command
-            xType = splitText[0] == '/getxxx'  # Get Porn Command
-            imageType = splitText[0] == '/get'  # Fetch Random Picture Command
-            gifType = splitText[0] == '/getgif'  # Fetch GIF Command
-            hugeType = splitText[0] == '/gethuge'  # Fetch Large Picture Command
-            vidType = splitText[0] == '/getvid'  # Get Top Youtube Result Command
-            hugeGifType = splitText[0] == '/gethugegif'  # Fetch Large GIF Command
-            dicType = splitText[0] == '/define'  # Command To Define A Word
-            urbanDicType = splitText[0] == '/urban'  # Urban Dictionary Command
+            wType = splitText[0].lower() == '/getweather'  # Get Weather Command
+            xType = splitText[0].lower() == '/getxxx'  # Get Porn Command
+            imageType = splitText[0].lower() == '/get'  # Fetch Random Picture Command
+            gifType = splitText[0].lower() == '/getgif'  # Fetch GIF Command
+            hugeType = splitText[0].lower() == '/gethuge'  # Fetch Large Picture Command
+            vidType = splitText[0].lower() == '/getvid'  # Get Top Youtube Result Command
+            hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
+            dicType = splitText[0].lower() == '/define'  # Command To Define A Word
+            urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
 
             requestText = splitText[1]  # imagetext is input text
 
