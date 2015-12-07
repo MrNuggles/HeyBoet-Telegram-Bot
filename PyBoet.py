@@ -75,6 +75,7 @@ def echo(bot, update_id, keyConfig):
             hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
             dicType = splitText[0].lower() == '/define'  # Command To Define A Word
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
+            placeType = splitText[0].lower() == '/place'  # Urban Dictionary Command
 
             requestText = splitText[1]  # imagetext is input text
 
@@ -145,8 +146,6 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
 
-                #bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(weather coming soon!)')
-
             elif xType:  # Porn Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&num=10&safe=off&cx=' + keyConfig.get\
                     ('Google', 'GCSE_XSE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
@@ -175,9 +174,9 @@ def echo(bot, update_id, keyConfig):
                         definitionText = partOfSpeech['Definitions'][random.randint(0, len(partOfSpeech['Definitions'])-1)]
                         bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + partOfSpeech['PartOfSpeech'] + ".\n" + definitionText)
                     else:
-                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
+                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + urllib.urlencode(realUrl))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + realUrl)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions here:\n' + urllib.urlencode(realUrl))
 
             elif urbanDicType:  # Urban Dictionary - Urban API
                 dicurl = 'http://api.urbandictionary.com/v0/define?term='
@@ -186,6 +185,17 @@ def echo(bot, update_id, keyConfig):
                 if len(data['list']) >= 1:
                     resultNum = data['list'][random.randint(0, len(data['list'])-1)]
                     bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + resultNum['definition'] + '\nExample:\n' + resultNum['example'])
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
+
+            elif placeType:  # Google Maps Places API
+                mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&q='
+                realUrl = mapsUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if len(data['results']) >= 1:
+                    latNum = data['results'][0]['geometry']['location']['lat']
+                    lngNum = data['results'][0]['geometry']['location']['lng']
+                    bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
             else:
