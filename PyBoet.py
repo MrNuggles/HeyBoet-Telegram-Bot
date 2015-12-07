@@ -82,49 +82,49 @@ def echo(bot, update_id, keyConfig):
             requestText = splitText[1]  # imagetext is input text
 
             if imageType:  # Image Search - GCSE API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif gifType:  # GIF Search - GCSE API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
 
             elif hugeType:  # Large Image Search - GCSE API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif hugeGifType:  # Large GIF Search - GCSE API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=xlarge" + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= '1':
                     imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
@@ -143,14 +143,18 @@ def echo(bot, update_id, keyConfig):
 
             elif wType:  # Weather - Yahoo API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                yahoourl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woe" \
-                           "id%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode('utf-8') + "%27" \
-                           ")%20and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
+                yahoourl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20" \
+                           "in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode('utf-8') + "%27)%20" \
+                           "and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
                 result = urllib.urlopen(yahoourl).read()
                 data = json.loads(result)
                 if data['query']['count'] == 1:
-                    forcast = data['query']['results']['channel']['item']['condition']
-                    bot.sendMessage(chat_id=chat_id, text='Weather for ' + requestText + ':\n' + 'Temp: ' + forcast['temp'] + '\nConditions: ' + forcast['text'])
+                    weather = data['query']['results']['channel']['item']['condition']
+                    forecast = data['query']['results']['channel']['item']['forecast']
+                    city = data['query']['results']['channel']['location']['city']
+                    bot.sendMessage(chat_id=chat_id, text=('It is currently ' + weather['text'] + ' in ' + city + ' with a temperature of '
+                                                           + weather['temp'] + 'C.\nA high of ' + forecast[0]['high'] + ' and a low of ' +
+                                                           forecast[0]['low'] + ' are expected during the day with conditions being ' + forecast[0]['text'] + '.'))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
 
