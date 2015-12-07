@@ -45,6 +45,8 @@ def main():
             elif e.message == "Could not parse file content":
                 # The file in the google search result link is not accessible.
                 sleep(1)
+            elif e.message in ("Unknown HTTPError"):
+                pass
             else:
                 raise e
         except URLError as e:
@@ -124,7 +126,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
             elif vidType:  # Video Search - YouTube API
-                vidurl = 'https://www.googleapis.com/youtube/v3/search?safeSearch=none&key=' + keyConfig.get\
+                vidurl = 'https://www.googleapis.com/youtube/v3/search?safeSearch=none&type=video&key=' + keyConfig.get\
                     ('Google', 'GCSE_APP_ID') + '&part=snippet&q='
                 realUrl = vidurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
