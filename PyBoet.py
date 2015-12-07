@@ -45,6 +45,8 @@ def main():
             elif e.message == "Could not parse file content":
                 # The file in the google search result link is not accessible.
                 sleep(1)
+            elif e.message in ("Unknown HTTPError"):
+                pass
             else:
                 raise e
         except URLError as e:
