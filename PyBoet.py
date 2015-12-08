@@ -5,7 +5,7 @@ import urllib
 import urllib2
 import random
 import ConfigParser
-from mcstatus import MinecraftServer
+#  from mcstatus import MinecraftServer
 
 from time import sleep
 
@@ -80,6 +80,7 @@ def echo(bot, update_id, keyConfig):
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
             placeType = splitText[0].lower() == '/place'  # Google Map Command
             mcType = splitText[0].lower() == '/mcstatus'  # Minecraft Server Status Command
+            translateType = splitText[0].lower() == '/translate'  # Google translate
 
             requestText = splitText[1]  # imagetext is input text
 
@@ -219,6 +220,22 @@ def echo(bot, update_id, keyConfig):
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
+
+            elif translateType:  # Google Translate API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.FIND_LOCATION)
+                translateUrl = 'https://www.googleapis.com/language/translate/v2?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&target=en&q='
+                realUrl = translateUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if len(data['data']['translations']) >= 1:
+                    translation = data['data']['translations'][0]['translatedText']
+                    detectedLanguage = data['data']['translations'][0]['detectedSourceLanguage']
+                    languagesList = json.load(urllib.urlopen('https://www.googleapis.com/language/translate/v2/languages?target=en&key=' + keyConfig.get('Google', 'GCSE_APP_ID')))['data']['languages']
+                    detectedLanguageSemanticName = [lang for lang in languagesList
+                                                    if lang['language'] == detectedLanguage][0]['name']
+
+                    bot.sendMessage(chat_id=chat_id, text="Detected language: " + detectedLanguageSemanticName + "\nMeaning: " + translation.title())
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any translations for ' + requestText)
 
             #elif mcType:  # mcstatus API
             #    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
