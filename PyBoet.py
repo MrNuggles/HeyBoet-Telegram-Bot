@@ -65,6 +65,7 @@ def echo(bot, update_id, keyConfig):
         message = update.message.text
 
         if message:
+            mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
             splitText = message.split(' ', 1)
             if len(splitText) <= 1:
                 continue
@@ -79,7 +80,6 @@ def echo(bot, update_id, keyConfig):
             dicType = splitText[0].lower() == '/define'  # Command To Define A Word
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
             placeType = splitText[0].lower() == '/place'  # Google Map Command
-            mcType = splitText[0].lower() == '/mcstatus'  # Minecraft Server Status Command
             translateType = splitText[0].lower() == '/translate'  # Google translate
 
             requestText = splitText[1]  # imagetext is input text
