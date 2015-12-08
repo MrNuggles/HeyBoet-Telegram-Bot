@@ -66,8 +66,10 @@ def echo(bot, update_id, keyConfig):
 
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
+            bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
+
             splitText = message.split(' ', 1)
-            if len(splitText) <= 1 and not mcType:
+            if len(splitText) <= 1 and not bcType or mcType:
                 continue
 
             wType = splitText[0].lower() == '/getweather'  # Get Weather Command
@@ -80,9 +82,9 @@ def echo(bot, update_id, keyConfig):
             dicType = splitText[0].lower() == '/define'  # Command To Define A Word
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
             placeType = splitText[0].lower() == '/place'  # Google Map Command
-            translateType = splitText[0].lower() == '/translate'  # Google translate
+            translateType = splitText[0].lower() == '/translate'  # Google translate Command
 
-            if not mcType:
+            if not bcType or mcType:
                 requestText = splitText[1]  # imagetext is input text
 
             if imageType:  # Image Search - GCSE API
@@ -238,6 +240,16 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any translations for ' + requestText)
 
+            elif bcType:  # Current Bitcoin Price - CoinDesk API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                bcurl = 'https://api.coindesk.com/v1/bpi/currentprice.json'
+                data = json.load(urllib.urlopen(bcurl))
+                updateTime = data['time']['updated']
+                priceEU = data['bpi']['EUR']
+                priceUS = data['bpi']['USD']
+                priceGB = data['bpi']['GBP']
+                bot.sendMessage(chat_id=chat_id, text='The Current Bitcoin Price:\n\n' + priceEU['rate'] + ' EUR\n' + priceGB['rate'] + ' GBP\n' + priceUS['rate'] + ' USD' + '\n\nTime Updated: ' + updateTime)
+
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 #  server = MinecraftServer.lookup("41.86.100.15:10050")
@@ -245,7 +257,7 @@ def echo(bot, update_id, keyConfig):
                 #  latency = server.ping()
                 #  query = server.query()
                 #  bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
-                bot.sendMessage(chat_id=chat_id, text=("I'm sorry Dave, MS status command has not yet been implimented."))
+                bot.sendMessage(chat_id=chat_id, text="I'm sorry Dave, MS status command has not yet been implimented.")
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
