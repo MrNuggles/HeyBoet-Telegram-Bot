@@ -69,8 +69,9 @@ def echo(bot, update_id, keyConfig):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
 
             splitText = message.split(' ', 1)
-            if len(splitText) <= 1 and not bcType or mcType:
+            if len(splitText) <= 1 and not bcType:
                 continue
+
 
             wType = splitText[0].lower() == '/getweather'  # Get Weather Command
             xType = splitText[0].lower() == '/getxxx'  # Get Porn Command
@@ -84,8 +85,8 @@ def echo(bot, update_id, keyConfig):
             placeType = splitText[0].lower() == '/place'  # Google Map Command
             translateType = splitText[0].lower() == '/translate'  # Google translate Command
 
-            if not bcType or mcType:
-                requestText = splitText[1]  # imagetext is input text
+            if not bcType:
+                requestText = splitText[1]
 
             if imageType:  # Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -250,16 +251,22 @@ def echo(bot, update_id, keyConfig):
                 priceUS = data['bpi']['USD']
                 priceZA = data['bpi']['ZAR']
                 priceGB = data2['bpi']['GBP']
-                bot.sendMessage(chat_id=chat_id, text='The Current Bitcoin Price:\n\n' + priceUS['rate'] + ' USD\n' + priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
+                bot.sendMessage(chat_id=chat_id, text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' +
+                                                      priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                #  server = MinecraftServer.lookup("41.86.100.15:10050")
-                #  status = server.status()
-                #  latency = server.ping()
-                #  query = server.query()
-                #  bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
-                bot.sendMessage(chat_id=chat_id, text="I'm sorry Dave, MS status command has not yet been implimented.")
+              #  mcurl = 'https://mcapi.us/server/status?ip=41.86.100.15&port=10050'
+              #  data = json.load(urllib.urlopen(mcurl))
+              #  status = data['online']
+              #  players = data['players']['now']
+              #  if status == 'true':
+              #      realstatus = 'Online'
+              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
+              #  else:
+              #      realstatus = 'Offline'
+              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
+
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
