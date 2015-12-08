@@ -240,11 +240,12 @@ def echo(bot, update_id, keyConfig):
 
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                server = MinecraftServer("41.86.100.15", 10050)
-                status = server.status()
-                latency = server.ping()
-                query = server.query()
-                bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+                #  server = MinecraftServer.lookup("41.86.100.15:10050")
+                #  status = server.status()
+                #  latency = server.ping()
+                #  query = server.query()
+                #  bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+                bot.sendMessage(chat_id=chat_id, text=("I'm sorry Dave, MS status command has not yet been implimented."))
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
