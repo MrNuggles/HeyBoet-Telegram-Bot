@@ -242,13 +242,15 @@ def echo(bot, update_id, keyConfig):
 
             elif bcType:  # Current Bitcoin Price - CoinDesk API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                bcurl = 'https://api.coindesk.com/v1/bpi/currentprice.json'
+                bcurl = 'https://api.coindesk.com/v1/bpi/currentprice/ZAR.json'
                 data = json.load(urllib.urlopen(bcurl))
+                bcurl2 = 'https://api.coindesk.com/v1/bpi/currentprice.json'
+                data2 = json.load(urllib.urlopen(bcurl2))
                 updateTime = data['time']['updated']
-                priceEU = data['bpi']['EUR']
                 priceUS = data['bpi']['USD']
-                priceGB = data['bpi']['GBP']
-                bot.sendMessage(chat_id=chat_id, text='The Current Bitcoin Price:\n\n' + priceEU['rate'] + ' EUR\n' + priceGB['rate'] + ' GBP\n' + priceUS['rate'] + ' USD' + '\n\nTime Updated: ' + updateTime)
+                priceZA = data['bpi']['ZAR']
+                priceGB = data2['bpi']['GBP']
+                bot.sendMessage(chat_id=chat_id, text='The Current Bitcoin Price:\n\n' + priceUS['rate'] + ' USD\n' + priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
