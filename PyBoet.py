@@ -5,7 +5,7 @@ import urllib
 import urllib2
 import random
 import ConfigParser
-#  from mcstatus import MinecraftServer
+from mcstatus import MinecraftServer
 
 from time import sleep
 
@@ -67,7 +67,7 @@ def echo(bot, update_id, keyConfig):
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
             splitText = message.split(' ', 1)
-            if len(splitText) <= 1:
+            if len(splitText) <= 1 and not mcType:
                 continue
 
             wType = splitText[0].lower() == '/getweather'  # Get Weather Command
@@ -82,7 +82,8 @@ def echo(bot, update_id, keyConfig):
             placeType = splitText[0].lower() == '/place'  # Google Map Command
             translateType = splitText[0].lower() == '/translate'  # Google translate
 
-            requestText = splitText[1]  # imagetext is input text
+            if not mcType:
+                requestText = splitText[1]  # imagetext is input text
 
             if imageType:  # Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -237,14 +238,14 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any translations for ' + requestText)
 
-            #elif mcType:  # mcstatus API
-            #    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-            #    server = MinecraftServer.lookup("41.86.100.15:10050")
-            #    status = server.status()
-            #    latency = server.ping()
-            #    query = server.query()
-            #    bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
-            #else:
+            elif mcType:  # mcstatus API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                server = MinecraftServer.lookup("41.86.100.15:10050")
+                status = server.status()
+                latency = server.ping()
+                query = server.query()
+                bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+            else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
     return update_id
