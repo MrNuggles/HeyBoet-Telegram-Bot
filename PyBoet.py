@@ -90,7 +90,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= '1':
+                if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
@@ -102,7 +102,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= '1':
+                if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
@@ -114,7 +114,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= '1':
+                if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
@@ -126,7 +126,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=xlarge" + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= '1':
+                if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
@@ -240,7 +240,7 @@ def echo(bot, update_id, keyConfig):
 
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                server = MinecraftServer.lookup("41.86.100.15:10050")
+                server = MinecraftServer("41.86.100.15", 10050)
                 status = server.status()
                 latency = server.ping()
                 query = server.query()
