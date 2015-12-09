@@ -48,6 +48,8 @@ def main():
                 sleep(1)
             elif e.message in ("Unknown HTTPError"):
                 pass
+            elif e.message in ("PHOTO_SAVE_FILE_INVALID"):
+                continue
             else:
                 raise e
         except URLError as e:
