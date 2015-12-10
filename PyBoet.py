@@ -266,12 +266,15 @@ def echo(bot, update_id, keyConfig):
                 tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
                 downloadUrl = tor2Url + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(searchUrl))
-                torrent = data['1']['torrent_hash']
-                tTitle = data['1']['title']
-                seeds = str(data['1']['seeds'])
-                leechs = str(data['1']['leechs'])
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                bot.sendDocument(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
+                if data['total_found'] >= 1 and '1' in data:
+                    torrent = data['1']['torrent_hash']
+                    tTitle = data['1']['title']
+                    seeds = str(data['1']['seeds'])
+                    leechs = str(data['1']['leechs'])
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
 
 
             elif mcType:  # mcstatus API
