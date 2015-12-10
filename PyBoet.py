@@ -5,6 +5,7 @@ import urllib
 import urllib2
 import random
 import ConfigParser
+import simplejson
 from mcstatus import MinecraftServer
 
 from time import sleep
@@ -86,6 +87,7 @@ def echo(bot, update_id, keyConfig):
             urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
             placeType = splitText[0].lower() == '/place'  # Google Map Command
             translateType = splitText[0].lower() == '/translate'  # Google translate Command
+            torrentType = splitText[0].lower() == '/torrent'  # Torrent Search Command
 
             if not bcType:
                 requestText = splitText[1]
@@ -255,6 +257,22 @@ def echo(bot, update_id, keyConfig):
                 priceGB = data2['bpi']['GBP']
                 bot.sendMessage(chat_id=chat_id, text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' +
                                                       priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
+
+
+            elif torrentType:  # Torrent Search + Fetch - Strike API
+
+                tor1Url = 'https://torrentproject.se/?s='
+                searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
+                tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
+                downloadUrl = tor2Url + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(searchUrl))
+                torrent = data['1']['torrent_hash']
+                tTitle = data['1']['title']
+                seeds = str(data['1']['seeds'])
+                leechs = str(data['1']['leechs'])
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                bot.sendDocument(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
+
 
             elif mcType:  # mcstatus API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
