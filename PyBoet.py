@@ -74,6 +74,8 @@ def echo(bot, update_id, keyConfig):
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
+            issposType = message.lower() == '/iss'  # ISS
+
             if ' ' in message:
                 splitText = message.split(' ', 1)
 
@@ -325,6 +327,10 @@ def echo(bot, update_id, keyConfig):
                         bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the next ISS sighting for ' + requestText)
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
+
+            elif issposType:
+                 bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='The Current Position of the ISS')
+
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
