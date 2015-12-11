@@ -190,7 +190,7 @@ def echo(bot, update_id, keyConfig):
                                 and not 'pornhub.com/users/' in xlink \
                                 and not 'pornhub.com/video/search?search=' in xlink \
                                 and not 'xnxx.com/tags/' in xlink \
-                                and not 'xhamster.com/stories_search/' in xlink:
+                                and not 'xhamster.com/stories_search' in xlink:
                             bot.sendMessage(chat_id=chat_id, text=xlink)
                             break
                 else:
