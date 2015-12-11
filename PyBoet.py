@@ -90,8 +90,8 @@ def echo(bot, update_id, keyConfig):
             placeType = splitText[0].lower() == '/place' if ' ' in message else False  # Google Map Command
             translateType = splitText[0].lower() == '/translate' if ' ' in message else False  # Google translate Command
             torrentType = splitText[0].lower() == '/torrent' if ' ' in message else False  # Torrent Search Command
-            wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Torrent Search Command
-            issType = splitText[0].lower() == '/iss' if ' ' in message else False  # Torrent Search Command
+            wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Wiki Search Command
+            issType = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -105,7 +105,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any images for ' + requestText.encode('utf-8'))
 
             elif gifType:  # GIF Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -118,7 +118,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
-
+                    
             elif hugeType:  # Large Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
@@ -129,7 +129,8 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a huge image for ' + requestText.encode('utf-8'))
 
             elif hugeGifType:  # Large GIF Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -141,7 +142,8 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any huge gifs for ' + requestText.encode('utf-8'))
 
             elif vidType:  # Video Search - YouTube API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -151,8 +153,10 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['items']) >= 1:
                     vidlink = data['items'][0]['id']['videoId']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='https://www.youtube.com/watch?v=' + vidlink + '&type=video')
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Video not found)')
 
             elif wType:  # Weather - Yahoo API
@@ -173,6 +177,7 @@ def echo(bot, update_id, keyConfig):
                                                            forecast[0]['text'] + '.\nSunrise: ' + astronomy['sunrise'] + '\nSunset: ' +
                                                            astronomy['sunset']))
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I don\'t know that place.')
 
             elif xType:  # Porn Search - GCSE API
@@ -209,10 +214,13 @@ def echo(bot, update_id, keyConfig):
                     partOfSpeech = data[random.randint(0, len(data)-1)]
                     if len(partOfSpeech['Definitions']) >= 1:
                         definitionText = partOfSpeech['Definitions'][0]
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text=requestText.title() + ":\n" + partOfSpeech['PartOfSpeech'] + ".\n\n" + definitionText)
                     else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions for the word ' + requestText + '.')
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any definitions for the word ' + requestText + '.')
 
             elif urbanDicType:  # Urban Dictionary - Urban API
@@ -222,8 +230,10 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['list']) >= 1:
                     resultNum = data['list'][random.randint(0, len(data['list'])-1)]
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='Urban Definition For ' + requestText.title() + ":\n" + resultNum['definition'] + '\n\nExample:\n' + resultNum['example'])
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any urban definitions for ' + requestText)
 
             elif placeType:  # Google Maps Places API
@@ -236,10 +246,10 @@ def echo(bot, update_id, keyConfig):
                     lngNum = data['results'][0]['geometry']['location']['lng']
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
 
             elif translateType:  # Google Translate API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.FIND_LOCATION)
                 translateUrl = 'https://www.googleapis.com/language/translate/v2?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&target=en&q='
                 realUrl = translateUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
@@ -249,13 +259,13 @@ def echo(bot, update_id, keyConfig):
                     languagesList = json.load(urllib.urlopen('https://www.googleapis.com/language/translate/v2/languages?target=en&key=' + keyConfig.get('Google', 'GCSE_APP_ID')))['data']['languages']
                     detectedLanguageSemanticName = [lang for lang in languagesList
                                                     if lang['language'] == detectedLanguage][0]['name']
-
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text="Detected language: " + detectedLanguageSemanticName + "\nMeaning: " + translation.title())
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any translations for ' + requestText)
 
             elif bcType:  # Current Bitcoin Price - CoinDesk API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 bcurl = 'https://api.coindesk.com/v1/bpi/currentprice/ZAR.json'
                 data = json.load(urllib.urlopen(bcurl))
                 bcurl2 = 'https://api.coindesk.com/v1/bpi/currentprice.json'
@@ -264,12 +274,12 @@ def echo(bot, update_id, keyConfig):
                 priceUS = data['bpi']['USD']
                 priceZA = data['bpi']['ZAR']
                 priceGB = data2['bpi']['GBP']
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 bot.sendMessage(chat_id=chat_id, text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' +
                                                       priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 
 
             elif torrentType:  # Torrent Search + Fetch - Strike API
-
                 tor1Url = 'https://torrentproject.se/?s='
                 searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
                 tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
@@ -283,8 +293,8 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
-
 
             #elif mcType:  # mcstatus API
               #  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -300,15 +310,16 @@ def echo(bot, update_id, keyConfig):
               #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
 
             elif wikiType:  # Wiki API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 wikiUrl = 'https://en.wikipedia.org//w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
                 realUrl = wikiUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['query']['search']) >= 1:
                     titleText = data['query']['search'][0]['title']
                     snippetText = data['query']['search'][0]['snippet']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text=titleText + ": " + MLStripper.strip_tags(snippetText))
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any wiki articles for ' + requestText + '.')
 
             elif issType:  # ISS API
@@ -326,13 +337,17 @@ def echo(bot, update_id, keyConfig):
                         timeStamp = data['response'][0]['risetime']
                         durationSeconds = data['response'][0]['duration']
                         startDateTime = datetime.datetime.fromtimestamp(timeStamp)
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text='The next ISS sighting in ' + requestText.encode('utf-8').title() + ' starts at ' + startDateTime.strftime('%H:%M:%S on %d-%m-%Y') + ' for ' + str(divmod(durationSeconds, 60)[0]) + ' minutes and ' + str(divmod(durationSeconds, 60)[1]) + ' seconds.')
                     else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the next ISS sighting for ' + requestText)
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
 
             elif issposType:
+                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='The Current Position of the ISS')
 
             else:
