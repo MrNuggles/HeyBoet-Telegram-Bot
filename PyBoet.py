@@ -184,12 +184,17 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= '1':
                     for item in data['items']:
                         xlink = item['link']
-                        if not 'xvideos.com/tags/' in xlink \
-                                and not 'xvideos.com/profiles/' in xlink \
-                                and not 'pornhub.com/users/' in xlink \
-                                and not 'pornhub.com/video/search?search=' in xlink \
-                                and not 'xnxx.com/tags/' in xlink \
-                                and not 'xhamster.com/stories_search' in xlink:
+                        if  \
+                                    'xvideos.com/tags/' not in xlink \
+                                and 'pornhub.com/users/' not in xlink \
+                                and 'pornhub.com/video/search?search=' not in xlink \
+                                and 'xvideos.com/profiles/' not in xlink \
+                                and 'xnxx.com/?' not in xlink \
+                                and 'xnxx.com/tags/' not in xlink \
+                                and 'xhamster.com/stories_search' not in xlink \
+                                and 'xvideos.com/tags' not in xlink \
+                                and 'redtube.com/pornstar/' not in xlink \
+                                :
                             bot.sendMessage(chat_id=chat_id, text=xlink)
                             break
                 else:
