@@ -89,6 +89,8 @@ def echo(bot, update_id, keyConfig):
                 placeType = splitText[0].lower() == '/place'  # Google Map Command
                 translateType = splitText[0].lower() == '/translate'  # Google translate Command
                 torrentType = splitText[0].lower() == '/torrent'  # Torrent Search Command
+                wikiType = splitText[0].lower() == '/wiki'  # Torrent Search Command
+                issType = splitText[0].lower() == '/iss'  # Torrent Search Command
 
                 requestText = splitText[1]
 
@@ -278,7 +280,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
 
 
-            elif mcType:  # mcstatus API
+            #elif mcType:  # mcstatus API
               #  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
               #  mcurl = 'https://mcapi.us/server/status?ip=41.86.100.15&port=10050'
               #  data = json.load(urllib.urlopen(mcurl))
