@@ -9,6 +9,7 @@ import urllib2
 import random
 import ConfigParser
 import MLStripper
+import simplejson
 from mcstatus import MinecraftServer
 
 from time import sleep
@@ -52,6 +53,8 @@ def main():
                 sleep(1)
             elif e.message in ("Unknown HTTPError"):
                 pass
+            elif e.message in ("PHOTO_SAVE_FILE_INVALID"):
+                continue
             else:
                 raise e
         except URLError as e:
@@ -70,6 +73,7 @@ def echo(bot, update_id, keyConfig):
 
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
+            bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             if ' ' in message:
                 splitText = message.split(' ', 1)
 
@@ -83,11 +87,10 @@ def echo(bot, update_id, keyConfig):
                 dicType = splitText[0].lower() == '/define'  # Command To Define A Word
                 urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
                 placeType = splitText[0].lower() == '/place'  # Google Map Command
-                translateType = splitText[0].lower() == '/translate'  # Google translate
-                wikiType = splitText[0].lower() == '/wiki'  # Wiki
-                issType = splitText[0].lower() == '/iss'  # ISS sightings
+                translateType = splitText[0].lower() == '/translate'  # Google translate Command
+                torrentType = splitText[0].lower() == '/torrent'  # Torrent Search Command
 
-                requestText = splitText[1]  # requestText is input text
+                requestText = splitText[1]
 
             if imageType:  # Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -97,7 +100,7 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
@@ -109,7 +112,7 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
 
@@ -121,7 +124,7 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink, caption=requestText + ('' if len(imagelink) > 100 else ': ' + imagelink))
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
@@ -133,7 +136,7 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink, document=imagelink)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Image not found)')
 
@@ -182,7 +185,8 @@ def echo(bot, update_id, keyConfig):
                                 and not 'xvideos.com/profiles/' in xlink \
                                 and not 'pornhub.com/users/' in xlink \
                                 and not 'pornhub.com/video/search?search=' in xlink \
-                                and not 'xnxx.com/tags/' in xlink:
+                                and not 'xnxx.com/tags/' in xlink \
+                                and not 'xhamster.com/stories_search/' in xlink:
                             bot.sendMessage(chat_id=chat_id, text=xlink)
                             break
                 else:
@@ -242,13 +246,50 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any translations for ' + requestText)
 
-            elif mcType:  # mcstatus API
+            elif bcType:  # Current Bitcoin Price - CoinDesk API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                server = MinecraftServer("41.86.100.15", 10050)
-                status = server.status()
-                latency = server.ping()
-                query = server.query()
-                bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+                bcurl = 'https://api.coindesk.com/v1/bpi/currentprice/ZAR.json'
+                data = json.load(urllib.urlopen(bcurl))
+                bcurl2 = 'https://api.coindesk.com/v1/bpi/currentprice.json'
+                data2 = json.load(urllib.urlopen(bcurl2))
+                updateTime = data['time']['updated']
+                priceUS = data['bpi']['USD']
+                priceZA = data['bpi']['ZAR']
+                priceGB = data2['bpi']['GBP']
+                bot.sendMessage(chat_id=chat_id, text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' +
+                                                      priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
+
+
+            elif torrentType:  # Torrent Search + Fetch - Strike API
+
+                tor1Url = 'https://torrentproject.se/?s='
+                searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
+                tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
+                downloadUrl = tor2Url + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(searchUrl))
+                if data['total_found'] >= 1 and '1' in data:
+                    torrent = data['1']['torrent_hash']
+                    tTitle = data['1']['title']
+                    seeds = str(data['1']['seeds'])
+                    leechs = str(data['1']['leechs'])
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
+
+
+            elif mcType:  # mcstatus API
+              #  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+              #  mcurl = 'https://mcapi.us/server/status?ip=41.86.100.15&port=10050'
+              #  data = json.load(urllib.urlopen(mcurl))
+              #  status = data['online']
+              #  players = data['players']['now']
+              #  if status == 'true':
+              #      realstatus = 'Online'
+              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
+              #  else:
+              #      realstatus = 'Offline'
+              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
 
             elif wikiType:  # Wiki API
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
