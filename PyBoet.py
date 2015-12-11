@@ -1,10 +1,14 @@
 import logging
+
+import datetime
+
 import telegram
 import json
 import urllib
 import urllib2
 import random
 import ConfigParser
+import MLStripper
 from mcstatus import MinecraftServer
 
 from time import sleep
@@ -66,24 +70,24 @@ def echo(bot, update_id, keyConfig):
 
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
-            splitText = message.split(' ', 1)
-            if len(splitText) <= 1 and not mcType:
-                continue
+            if ' ' in message:
+                splitText = message.split(' ', 1)
 
-            wType = splitText[0].lower() == '/getweather'  # Get Weather Command
-            xType = splitText[0].lower() == '/getxxx'  # Get Porn Command
-            imageType = splitText[0].lower() == '/get'  # Fetch Random Picture Command
-            gifType = splitText[0].lower() == '/getgif'  # Fetch GIF Command
-            hugeType = splitText[0].lower() == '/gethuge'  # Fetch Large Picture Command
-            vidType = splitText[0].lower() == '/getvid'  # Get Top Youtube Result Command
-            hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
-            dicType = splitText[0].lower() == '/define'  # Command To Define A Word
-            urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
-            placeType = splitText[0].lower() == '/place'  # Google Map Command
-            translateType = splitText[0].lower() == '/translate'  # Google translate
+                wType = splitText[0].lower() == '/getweather'  # Get Weather Command
+                xType = splitText[0].lower() == '/getxxx'  # Get Porn Command
+                imageType = splitText[0].lower() == '/get'  # Fetch Random Picture Command
+                gifType = splitText[0].lower() == '/getgif'  # Fetch GIF Command
+                hugeType = splitText[0].lower() == '/gethuge'  # Fetch Large Picture Command
+                vidType = splitText[0].lower() == '/getvid'  # Get Top Youtube Result Command
+                hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
+                dicType = splitText[0].lower() == '/define'  # Command To Define A Word
+                urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
+                placeType = splitText[0].lower() == '/place'  # Google Map Command
+                translateType = splitText[0].lower() == '/translate'  # Google translate
+                wikiType = splitText[0].lower() == '/wiki'  # Wiki
+                issType = splitText[0].lower() == '/iss'  # ISS sightings
 
-            if not mcType:
-                requestText = splitText[1]  # imagetext is input text
+                requestText = splitText[1]  # requestText is input text
 
             if imageType:  # Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -245,6 +249,39 @@ def echo(bot, update_id, keyConfig):
                 latency = server.ping()
                 query = server.query()
                 bot.sendMessage(chat_id=chat_id, text=("The server has {0} players and replied in {1} ms".format(status.players.online, status.latency)))
+
+            elif wikiType:  # Wiki API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                wikiUrl = 'https://en.wikipedia.org//w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
+                realUrl = wikiUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if len(data['query']['search']) >= 1:
+                    titleText = data['query']['search'][0]['title']
+                    snippetText = data['query']['search'][0]['snippet']
+                    bot.sendMessage(chat_id=chat_id, text=titleText + ": " + MLStripper.strip_tags(snippetText))
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any wiki articles for ' + requestText + '.')
+
+            elif issType:  # ISS API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
+                realUrl = mapsUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if len(data['results']) >= 1:
+                    latNum = data['results'][0]['geometry']['location']['lat']
+                    lngNum = data['results'][0]['geometry']['location']['lng']
+                    issSightingsUrl = 'http://api.open-notify.org/iss-pass.json?lat='
+                    realUrl = issSightingsUrl + str(latNum) + '&lon=' + str(lngNum)
+                    data = json.load(urllib.urlopen(realUrl))
+                    if len(data['response']) >= 1:
+                        timeStamp = data['response'][0]['risetime']
+                        durationSeconds = data['response'][0]['duration']
+                        startDateTime = datetime.datetime.fromtimestamp(timeStamp)
+                        bot.sendMessage(chat_id=chat_id, text='The next ISS sighting in ' + requestText.encode('utf-8').title() + ' starts at ' + startDateTime.strftime('%H:%M:%S on %d-%m-%Y') + ' for ' + str(divmod(durationSeconds, 60)[0]) + ' minutes and ' + str(divmod(durationSeconds, 60)[1]) + ' seconds.')
+                    else:
+                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the next ISS sighting for ' + requestText)
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
             else:
                 pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
 
