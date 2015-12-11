@@ -76,25 +76,24 @@ def echo(bot, update_id, keyConfig):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS
 
-            if ' ' in message:
-                splitText = message.split(' ', 1)
+            splitText = message.split(' ', 1)
 
-                wType = splitText[0].lower() == '/getweather'  # Get Weather Command
-                xType = splitText[0].lower() == '/getxxx'  # Get Porn Command
-                imageType = splitText[0].lower() == '/get'  # Fetch Random Picture Command
-                gifType = splitText[0].lower() == '/getgif'  # Fetch GIF Command
-                hugeType = splitText[0].lower() == '/gethuge'  # Fetch Large Picture Command
-                vidType = splitText[0].lower() == '/getvid'  # Get Top Youtube Result Command
-                hugeGifType = splitText[0].lower() == '/gethugegif'  # Fetch Large GIF Command
-                dicType = splitText[0].lower() == '/define'  # Command To Define A Word
-                urbanDicType = splitText[0].lower() == '/urban'  # Urban Dictionary Command
-                placeType = splitText[0].lower() == '/place'  # Google Map Command
-                translateType = splitText[0].lower() == '/translate'  # Google translate Command
-                torrentType = splitText[0].lower() == '/torrent'  # Torrent Search Command
-                wikiType = splitText[0].lower() == '/wiki'  # Torrent Search Command
-                issType = splitText[0].lower() == '/iss'  # Torrent Search Command
+            wType = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
+            xType = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
+            imageType = splitText[0].lower() == '/get' if ' ' in message else False  # Fetch Random Picture Command
+            gifType = splitText[0].lower() == '/getgif' if ' ' in message else False  # Fetch GIF Command
+            hugeType = splitText[0].lower() == '/gethuge' if ' ' in message else False  # Fetch Large Picture Command
+            vidType = splitText[0].lower() == '/getvid' if ' ' in message else False  # Get Top Youtube Result Command
+            hugeGifType = splitText[0].lower() == '/gethugegif' if ' ' in message else False  # Fetch Large GIF Command
+            dicType = splitText[0].lower() == '/define' if ' ' in message else False  # Command To Define A Word
+            urbanDicType = splitText[0].lower() == '/urban' if ' ' in message else False  # Urban Dictionary Command
+            placeType = splitText[0].lower() == '/place' if ' ' in message else False  # Google Map Command
+            translateType = splitText[0].lower() == '/translate' if ' ' in message else False  # Google translate Command
+            torrentType = splitText[0].lower() == '/torrent' if ' ' in message else False  # Torrent Search Command
+            wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Torrent Search Command
+            issType = splitText[0].lower() == '/iss' if ' ' in message else False  # Torrent Search Command
 
-                requestText = splitText[1]
+            requestText = splitText[1] if ' ' in message else ''
 
             if imageType:  # Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
