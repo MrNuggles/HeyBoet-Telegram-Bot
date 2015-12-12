@@ -379,7 +379,7 @@ def echo(bot, update_id, keyConfig):
                         authorDescription = authorDescription[:-2]
                     else:
                         authorDescription = bookData['authors'][0]
-                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + ' (' + saleData['saleability'] + ' in ' + saleData['country'] + ' is ' + (' not ' if not saleData['isEbook'] else '') + 'available as an ebook)'
+                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + ' (' + saleData['saleability'] + ' in ' + saleData['country'] + ' and is ' + (' not ' if not saleData['isEbook'] else '') + 'available as an ebook)'
                     if 'imageLinks' in bookData:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                         bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=bookDescription)
