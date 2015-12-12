@@ -341,12 +341,12 @@ def echo(bot, update_id, keyConfig):
                 track = client.get('/tracks', q=requestText.encode('utf-8'), sharing='public')
                 if len(track) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text=track[0].title + ':\n' + track[0].uri)
+                    bot.sendMessage(chat_id=chat_id, text=track[0].title + ':\n' + track[0].permalink_url)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the sound of ' + requestText.encode('utf-8'))
 
-            elif issposType:
+            elif issposType:  # IS
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='Current Position of the ISS')
 
