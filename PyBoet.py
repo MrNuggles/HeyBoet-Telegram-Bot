@@ -76,7 +76,8 @@ def echo(bot, update_id, keyConfig):
         if message:
             mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
-            issposType = message.lower() == '/iss'  # ISS
+            issposType = message.lower() == '/iss'  # ISS Position Command
+            currencyType = message.lower() == '/rand'  # Currency Command
 
             splitText = message.split(' ', 1)
 
@@ -283,7 +284,7 @@ def echo(bot, update_id, keyConfig):
                                                       priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 
 
-            elif torrentType:  # Torrent Search + Fetch - Strike API
+            elif torrentType:  # Torrent Search + Fetch - Strike + TorrentProject API
                 tor1Url = 'https://torrentproject.se/?s='
                 searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
                 tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
@@ -299,19 +300,6 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
-
-            #elif mcType:  # mcstatus API
-              #  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-              #  mcurl = 'https://mcapi.us/server/status?ip=41.86.100.15&port=10050'
-              #  data = json.load(urllib.urlopen(mcurl))
-              #  status = data['online']
-              #  players = data['players']['now']
-              #  if status == 'true':
-              #      realstatus = 'Online'
-              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
-              #  else:
-              #      realstatus = 'Offline'
-              #      bot.sendMessage(chat_id=chat_id, text='Minecraft Server Details:\nServer Status: ' + realstatus + '\nPlayer Online: ' + players)
 
             elif wikiType:  # Wiki API
                 wikiUrl = 'https://en.wikipedia.org//w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
@@ -361,10 +349,23 @@ def echo(bot, update_id, keyConfig):
 
             elif issposType:
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                 bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='The Current Position of the ISS')
+                 bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='Current Position of the ISS')
+
+            elif currencyType:  # Currency Converter - fixer.io API
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                usdurl = 'http://api.fixer.io/latest?base=USD'
+                gbpurl = 'http://api.fixer.io/latest?base=GBP'
+                eururl = 'http://api.fixer.io/latest?base=EUR'
+                data1 = json.load(urllib.urlopen(usdurl))
+                data2 = json.load(urllib.urlopen(gbpurl))
+                data3 = json.load(urllib.urlopen(eururl))
+                zarusd = int(data1['rates']['ZAR'])
+                zargbp = int(data2['rates']['ZAR'])
+                zareur = int(data3['rates']['ZAR'])
+                bot.sendMessage(chat_id=chat_id, text='1 USD = ' + str(zarusd) + ' ZAR\n1 GBP = ' + str(zargbp) + ' ZAR\n1 EUR = ' + str(zareur) + ' ZAR')
 
             else:
-                pass  # bot.sendMessage(chat_id=chat_id, text='Hey Boet! Use a valid command next time...')
+                pass
 
     return update_id
 
