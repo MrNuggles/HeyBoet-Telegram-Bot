@@ -283,7 +283,6 @@ def echo(bot, update_id, keyConfig):
                 bot.sendMessage(chat_id=chat_id, text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' +
                                                       priceGB['rate'] + ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 
-
             elif torrentType:  # Torrent Search + Fetch - Strike + TorrentProject API
                 tor1Url = 'https://torrentproject.se/?s='
                 searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
@@ -302,7 +301,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
 
             elif wikiType:  # Wiki API
-                wikiUrl = 'https://en.wikipedia.org//w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
+                wikiUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
                 realUrl = wikiUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['query']['search']) >= 1:
@@ -359,9 +358,9 @@ def echo(bot, update_id, keyConfig):
                 data1 = json.load(urllib.urlopen(usdurl))
                 data2 = json.load(urllib.urlopen(gbpurl))
                 data3 = json.load(urllib.urlopen(eururl))
-                zarusd = int(data1['rates']['ZAR'])
-                zargbp = int(data2['rates']['ZAR'])
-                zareur = int(data3['rates']['ZAR'])
+                zarusd = float(data1['rates']['ZAR'])
+                zargbp = float(data2['rates']['ZAR'])
+                zareur = float(data3['rates']['ZAR'])
                 bot.sendMessage(chat_id=chat_id, text='1 USD = ' + str(zarusd) + ' ZAR\n1 GBP = ' + str(zargbp) + ' ZAR\n1 EUR = ' + str(zareur) + ' ZAR')
 
             else:
