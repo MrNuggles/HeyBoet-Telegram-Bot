@@ -78,6 +78,7 @@ def echo(bot, update_id, keyConfig):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
+            figType = message.lower() == '/getfig'  # Get a picture of a fig
 
             splitText = message.split(' ', 1)
 
@@ -96,6 +97,7 @@ def echo(bot, update_id, keyConfig):
             wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Wiki Search Command
             issType = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
             soundType = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
+            bookType = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -362,6 +364,44 @@ def echo(bot, update_id, keyConfig):
                 zargbp = float(data2['rates']['ZAR'])
                 zareur = float(data3['rates']['ZAR'])
                 bot.sendMessage(chat_id=chat_id, text='1 USD = ' + str(zarusd) + ' ZAR\n1 GBP = ' + str(zargbp) + ' ZAR\n1 EUR = ' + str(zareur) + ' ZAR')
+
+            elif bookType:  # Google Books API
+                booksUrl = 'https://www.googleapis.com/books/v1/volumes?maxResults=1&key=' + keyConfig.get('Google','GCSE_APP_ID') + '&q='
+                realUrl = booksUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if data['totalItems'] >= 1:
+                    bookData = data['items'][0]['volumeInfo']
+                    saleData = data['items'][0]['saleInfo']
+                    authorDescription = ''
+                    if len(bookData['authors']) > 1:
+                        for author in bookData['authors']:
+                            authorDescription +=  author + ', '
+                        authorDescription = authorDescription[:-2]
+                    else:
+                        authorDescription = bookData['authors'][0]
+                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + ' (' + saleData['saleability'] + ' in ' + saleData['country'] + ' is ' + (' not ' if not saleData['isEbook'] else '') + 'available as an ebook)'
+                    if 'imageLinks' in bookData:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=bookDescription)
+                    else:
+                        if 'description' in bookData:
+                            bookDescription += '.\n' + bookData['description']
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id, text=bookDescription)
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any books for ' + requestText.encode('utf-8'))
+
+            if figType:  # Fig Search - GCSE API
+                realUrl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
+                 'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q=fig'
+                data = json.load(urllib.urlopen(realUrl))
+                if data['searchInformation']['totalResults'] >= 1:
+                    imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any figs.')
 
             else:
                 pass
