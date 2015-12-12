@@ -11,6 +11,8 @@ import ConfigParser
 import MLStripper
 import simplejson
 from mcstatus import MinecraftServer
+import libtorrent
+import soundcloud
 
 from time import sleep
 
@@ -92,6 +94,7 @@ def echo(bot, update_id, keyConfig):
             torrentType = splitText[0].lower() == '/torrent' if ' ' in message else False  # Torrent Search Command
             wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Wiki Search Command
             issType = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
+            soundType = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -108,17 +111,18 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any images for ' + requestText.encode('utf-8'))
 
             elif gifType:  # GIF Search - GCSE API
-                googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
-                 'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
-                realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
+                gifUrl = 'http://api.giphy.com/v1/gifs/search?q='
+                apiKey = '&api_key=dc6zaTOxFJmzC&limit=1'
+                realUrl = gifUrl + requestText.encode('utf-8') + apiKey
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= 1:
-                    imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
+                if len(data['data']) >= 1:
+                    imagelink = data['data'][0]['url']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_DOCUMENT)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + '.gif', document=imagelink.encode('utf-8'))
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
-                    
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a gif for ' + requestText.encode('utf-8'))
+
             elif hugeType:  # Large Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
@@ -323,7 +327,6 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any wiki articles for ' + requestText + '.')
 
             elif issType:  # ISS API
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
                 realUrl = mapsUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
@@ -345,6 +348,16 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any places for ' + requestText)
+
+            elif soundType:  # Soundcloud API
+                client = soundcloud.Client(client_id=keyConfig.get('Soundcloud','SC_CLIENT_ID'))
+                track = client.get('/tracks', q=requestText.encode('utf-8'), sharing='public')
+                if len(track) >= 1:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text=track[0].title + ':\n' + track[0].uri)
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the sound of ' + requestText.encode('utf-8'))
 
             elif issposType:
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
