@@ -86,6 +86,7 @@ def echo(bot, update_id, keyConfig):
             xType = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
             imageType = splitText[0].lower() == '/get' if ' ' in message else False  # Fetch Random Picture Command
             gifType = splitText[0].lower() == '/getgif' if ' ' in message else False  # Fetch GIF Command
+            giphyType = splitText[0].lower() == '/getgiphy' if ' ' in message else False  # Fetch Giphy GIF Command
             hugeType = splitText[0].lower() == '/gethuge' if ' ' in message else False  # Fetch Large Picture Command
             vidType = splitText[0].lower() == '/getvid' if ' ' in message else False  # Get Top Youtube Result Command
             hugeGifType = splitText[0].lower() == '/gethugegif' if ' ' in message else False  # Fetch Large GIF Command
@@ -113,12 +114,24 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any images for ' + requestText.encode('utf-8'))
 
-            elif gifType:  # GIF Search - GCSE API
-                gifUrl = 'http://api.giphy.com/v1/gifs/search?q='
-                apiKey = '&api_key=dc6zaTOxFJmzC&limit=1'
-                realUrl = gifUrl + requestText.encode('utf-8') + apiKey
+            elif gifType: # GIF Search - GCSE API
+                googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
+                          'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
+                realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
-                if len(data['data']) >= 1:
+                if data['searchInformation']['totalResults'] >= 1:
+                    imagelink = data['items'][random.randint(0, 9)]['link']
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
+                else:
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t do that.\n(Gif not found)')
+
+            elif giphyType:  # Giphy Search - GCSE API
+                giphyUrl = 'http://api.giphy.com/v1/gifs/search?q='
+                apiKey = '&api_key=dc6zaTOxFJmzC&limit=1'
+                realUrl = giphyUrl + requestText.encode('utf-8') + apiKey
+                data = json.load(urllib.urlopen(realUrl))
+                if data['pagination']['total_count'] >= 1:
                     imagelink = data['data'][0]['url']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_DOCUMENT)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + '.gif', document=imagelink.encode('utf-8'))
@@ -132,7 +145,7 @@ def echo(bot, update_id, keyConfig):
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
                 data = json.load(urllib.urlopen(realUrl))
                 if data['searchInformation']['totalResults'] >= 1:
-                    imagelink = data['items'][random.randint(0, 9)]['link']
+                    imagelink = data['items'][0]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
@@ -399,7 +412,7 @@ def echo(bot, update_id, keyConfig):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=('' if len(imagelink.encode('utf-8')) > 100 else imagelink.encode('utf-8')))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any figs.')
 
