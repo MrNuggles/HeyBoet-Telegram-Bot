@@ -364,7 +364,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find the sound of ' + requestText.encode('utf-8'))
 
-            elif issposType:  # IS
+            elif issposType:  # ISS
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  bot.sendPhoto(chat_id=chat_id, photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544', caption='Current Position of the ISS')
 
