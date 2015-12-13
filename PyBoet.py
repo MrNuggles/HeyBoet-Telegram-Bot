@@ -385,23 +385,18 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['totalItems'] >= 1:
                     bookData = data['items'][0]['volumeInfo']
-                    accessData = data['items'][0]['accessInfo']
-                    authorDescription = ''
-                    if len(bookData['authors']) > 1:
-                        for author in bookData['authors']:
-                            authorDescription +=  author + ', '
-                        authorDescription = authorDescription[:-2]
-                    else:
-                        authorDescription = bookData['authors'][0]
-                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + '\n' + accessData['webReaderLink']
+                    googleBooksUrl = data['items'][0]['accessInfo']['webReaderLink']
                     if 'imageLinks' in bookData:
-                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                        bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=bookDescription)
+                        import httplib
+                        try:
+                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                            bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=googleBooksUrl)
+                        except httplib.BadStatusLine:
+                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                            bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any books for ' + requestText.encode('utf-8'))
                     else:
-                        if 'description' in bookData:
-                            bookDescription += '.\n' + bookData['description']
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                        bot.sendMessage(chat_id=chat_id, text=bookDescription)
+                        bot.sendMessage(chat_id=chat_id, text=googleBooksUrl)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any books for ' + requestText.encode('utf-8'))
