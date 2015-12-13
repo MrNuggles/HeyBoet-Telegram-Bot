@@ -80,7 +80,7 @@ def echo(bot, update_id, keyConfig):
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
             figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
-            isisType = message.lower() == '/isis'  # Get latest isis news (common /iss typo)
+            isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
 
             splitText = message.split(' ', 1)
 
@@ -101,6 +101,7 @@ def echo(bot, update_id, keyConfig):
             issType = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
             soundType = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
             bookType = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
+            movieType = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -418,6 +419,21 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any ISIS news.')
+
+            if movieType:  # Movie from OMDB API
+                movieUrl = 'http://www.omdbapi.com/?plot=short&r=json&y=&t='
+                realUrl = movieUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if 'Error' not in data:
+                    if 'Poster' in data:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        bot.sendPhoto(chat_id=chat_id, photo=data['Poster'], caption=data['Title'] + ':\n' + data['Plot'])
+                    else:
+                        bot.sendChaZtAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id, text=data['Title'] + ':\n' + data['Plot'])
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any movies for ' + requestText.encode('utf-8'))
 
             else:
                 pass
