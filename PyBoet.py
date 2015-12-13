@@ -80,7 +80,7 @@ def echo(bot, update_id, keyConfig):
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
             figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
-            isisType = message.lower() == '/isis'  # Get a picture of a fig
+            isisType = message.lower() == '/isis'  # Get latest isis news (common /iss typo)
 
             splitText = message.split(' ', 1)
 
