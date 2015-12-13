@@ -1,3 +1,4 @@
+# coding=utf-8
 import logging
 
 import datetime
@@ -384,7 +385,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if data['totalItems'] >= 1:
                     bookData = data['items'][0]['volumeInfo']
-                    saleData = data['items'][0]['saleInfo']
+                    accessData = data['items'][0]['accessInfo']
                     authorDescription = ''
                     if len(bookData['authors']) > 1:
                         for author in bookData['authors']:
@@ -392,7 +393,7 @@ def echo(bot, update_id, keyConfig):
                         authorDescription = authorDescription[:-2]
                     else:
                         authorDescription = bookData['authors'][0]
-                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + ' (' + saleData['saleability'] + ' in ' + saleData['country'] + ' and is ' + (' not ' if not saleData['isEbook'] else '') + 'available as an ebook)'
+                    bookDescription = bookData['title'] + ': by ' + authorDescription + ' published on ' + bookData['publishedDate'] + '\n' + accessData['webReaderLink']
                     if 'imageLinks' in bookData:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                         bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=bookDescription)
