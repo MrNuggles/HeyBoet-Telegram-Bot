@@ -1,8 +1,6 @@
 # coding=utf-8
 import logging
 
-import datetime
-
 import telegram
 import json
 import urllib
@@ -11,9 +9,11 @@ import random
 import ConfigParser
 import MLStripper
 import simplejson
+import datetime
 from mcstatus import MinecraftServer
 import libtorrent
 import soundcloud
+import feedparser
 
 from time import sleep
 
@@ -79,7 +79,8 @@ def echo(bot, update_id, keyConfig):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
-            figType = message.lower() == '/getfig'  # Get a picture of a fig
+            figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
+            isisType = message.lower() == '/isis'  # Get a picture of a fig
 
             splitText = message.split(' ', 1)
 
@@ -387,13 +388,8 @@ def echo(bot, update_id, keyConfig):
                     bookData = data['items'][0]['volumeInfo']
                     googleBooksUrl = data['items'][0]['accessInfo']['webReaderLink']
                     if 'imageLinks' in bookData:
-                        import httplib
-                        try:
-                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                            bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=googleBooksUrl)
-                        except httplib.BadStatusLine:
-                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                            bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any books for ' + requestText.encode('utf-8'))
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'], caption=googleBooksUrl)
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text=googleBooksUrl)
@@ -410,7 +406,18 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=('' if len(imagelink.encode('utf-8')) > 100 else imagelink.encode('utf-8')))
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any figs.')
+
+            if isisType:  # Isis news rss feed
+                realUrl = 'http://isis.liveuamap.com/rss'
+                data = feedparser.parse(realUrl)
+                if len(data.entries) >= 1:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text=data.entries[random.randint(0, 9)].link)
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any ISIS news.')
 
             else:
                 pass
