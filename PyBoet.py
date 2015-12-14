@@ -33,7 +33,17 @@ def main():
     # get the first pending update_id, this is so we can skip over it in case
     # we get an "Unauthorized" exception.
     try:
-        update_id = bot.getUpdates()[0].update_id
+        allUpdates = bot.getUpdates()
+        update_id = allUpdates[0].update_id
+
+#       data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates'))
+#       if len(data['result']) >= 1:
+#           lastUpdateId = data['result'][-1]['update_id']
+#           data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(lastUpdateId + 1)))
+#           bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+#           bot.sendMessage(chat_id=chat_id, text='Reset went OK?\n' + data['ok'])
+#       else:
+#           bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)#           bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m already reset. I can\'t reset any further!')
     except IndexError:
         update_id = None
 
@@ -65,7 +75,6 @@ def main():
 
 
 def echo(bot, update_id, keyConfig):
-
     # Request updates after the last update_id
     for update in bot.getUpdates(offset=update_id, timeout=10):
         # chat_id is required to reply to any message
@@ -317,17 +326,22 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
 
             elif wikiType:  # Wiki API
-                wikiUrl = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&titles=Main%20Page&srlimit=1&srsearch='
+                wikiUrl = 'https://simple.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
                 realUrl = wikiUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if len(data['query']['search']) >= 1:
-                    titleText = data['query']['search'][0]['title']
-                    snippetText = data['query']['search'][0]['snippet']
+                if len(data[2]) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text=titleText + ": " + MLStripper.strip_tags(snippetText))
+                    bot.sendMessage(chat_id=chat_id, text=data[2][0])
                 else:
-                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any wiki articles for ' + requestText + '.')
+                    wikiUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
+                    realUrl = wikiUrl + requestText.encode('utf-8')
+                    data = json.load(urllib.urlopen(realUrl))
+                    if len(data[2]) >= 1:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id, text=data[2][0])
+                    else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any wiki articles for ' + requestText + '.')
 
             elif issType:  # ISS API
                 mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
@@ -435,7 +449,6 @@ def echo(bot, update_id, keyConfig):
 
             elif updateType and requestText == keyConfig.get('HeyBoet', 'UPDATE_KEY'):  # Self update
                 urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id))
-
                 import subprocess
                 import os
                 import sys
