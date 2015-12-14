@@ -398,7 +398,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any books for ' + requestText.encode('utf-8'))
 
-            if figType:  # Fig Search - GCSE API
+            elif figType:  # Fig Search - GCSE API
                 realUrl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q=fig'
                 data = json.load(urllib.urlopen(realUrl))
@@ -410,7 +410,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any figs.')
 
-            if isisType:  # Isis news rss feed
+            elif isisType:  # Isis news rss feed
                 realUrl = 'http://isis.liveuamap.com/rss'
                 data = feedparser.parse(realUrl)
                 if len(data.entries) >= 1:
@@ -420,7 +420,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any ISIS news.')
 
-            if movieType:  # Movie from OMDB API
+            elif movieType:  # Movie from OMDB API
                 movieUrl = 'http://www.omdbapi.com/?plot=short&r=json&y=&t='
                 realUrl = movieUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
