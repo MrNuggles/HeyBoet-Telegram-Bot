@@ -429,7 +429,7 @@ def echo(bot, update_id, keyConfig):
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                         bot.sendPhoto(chat_id=chat_id, photo=data['Poster'], caption=data['Title'] + ':\n' + data['Plot'])
                     else:
-                        bot.sendChaZtAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id, text=data['Title'] + ':\n' + data['Plot'])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
