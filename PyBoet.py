@@ -70,9 +70,11 @@ def echo(bot, update_id, keyConfig):
     allUpdates = bot.getUpdates()
     for update in allUpdates:
         if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
-            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(allUpdates[-1].update_id + 1)))
+            newIdAfterReset = allUpdates[-1].update_id + 1
+            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(newIdAfterReset)))
             bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-            bot.sendMessage(chat_id=update.message.chat_id, text='Reset went OK?' if data['ok'] else 'Reset failed.')
+            bot.sendMessage(chat_id=update.message.chat_id, text='Message queue reset.' if data['ok'] else 'Reset failed.')
+            return newIdAfterReset
 
     # Request updates after the last update_id
     for update in allUpdates:
