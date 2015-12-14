@@ -11,7 +11,6 @@ import MLStripper
 import simplejson
 import datetime
 from mcstatus import MinecraftServer
-import libtorrent
 import soundcloud
 import feedparser
 
@@ -102,6 +101,7 @@ def echo(bot, update_id, keyConfig):
             soundType = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
             bookType = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
             movieType = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
+            updateType = splitText[0].lower() == '/update' if ' ' in message else False  # Self update
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -304,8 +304,6 @@ def echo(bot, update_id, keyConfig):
             elif torrentType:  # Torrent Search + Fetch - Strike + TorrentProject API
                 tor1Url = 'https://torrentproject.se/?s='
                 searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
-                tor2Url = 'https://getstrike.net/api/v2/torrents/download/?hash='
-                downloadUrl = tor2Url + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(searchUrl))
                 if data['total_found'] >= 1 and '1' in data:
                     torrent = data['1']['torrent_hash']
@@ -434,6 +432,15 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any movies for ' + requestText.encode('utf-8'))
+
+            elif updateType and requestText == keyConfig.get('HeyBoet', 'UPDATE_KEY'):  # Self update
+                urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id))
+
+                import subprocess
+                import os
+                import sys
+                subprocess.call(["git", "pull"])
+                os.execv(sys.executable, sys.argv)
 
             else:
                 pass
