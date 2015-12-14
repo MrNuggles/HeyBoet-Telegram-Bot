@@ -33,17 +33,8 @@ def main():
     # get the first pending update_id, this is so we can skip over it in case
     # we get an "Unauthorized" exception.
     try:
-        allUpdates = bot.getUpdates()
-        update_id = allUpdates[0].update_id
+        update_id = bot.getUpdates()[0].update_id
 
-#       data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates'))
-#       if len(data['result']) >= 1:
-#           lastUpdateId = data['result'][-1]['update_id']
-#           data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(lastUpdateId + 1)))
-#           bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-#           bot.sendMessage(chat_id=chat_id, text='Reset went OK?\n' + data['ok'])
-#       else:
-#           bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)#           bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m already reset. I can\'t reset any further!')
     except IndexError:
         update_id = None
 
@@ -75,8 +66,16 @@ def main():
 
 
 def echo(bot, update_id, keyConfig):
+    # Sense reset
+    allUpdates = bot.getUpdates()
+    for update in allUpdates:
+        if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
+            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(allUpdates[-1].update_id + 1)))
+            bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
+            bot.sendMessage(chat_id=update.message.chat_id, text='Reset went OK?\n' + str(data['ok']))
+
     # Request updates after the last update_id
-    for update in bot.getUpdates(offset=update_id, timeout=10):
+    for update in allUpdates:
         # chat_id is required to reply to any message
         chat_id = update.message.chat_id
         update_id = update.update_id + 1
@@ -447,7 +446,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any movies for ' + requestText.encode('utf-8'))
 
-            elif updateType and requestText == keyConfig.get('HeyBoet', 'UPDATE_KEY'):  # Self update
+            elif updateType and requestText == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):  # Self update
                 urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id))
                 import subprocess
                 import os
