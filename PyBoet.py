@@ -116,8 +116,8 @@ def echo(bot, update_id, keyConfig):
             movieType =  splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
             updateType =  splitText[0].lower() == '/update' if ' ' in message else False  # Self update
 
-            figType = False # message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
-            isisType = False # message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
+            figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
+            isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
 
             answerType = splitText[0].lower() == '/getanswer' if ' ' in message else False  # An answer from Wolfram Alpha API
 
@@ -133,6 +133,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any images for ' + requestText.encode('utf-8') + '.')
 
             elif gifType: # GIF Search - GCSE API
@@ -145,6 +146,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
                 else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a gif for ' + requestText.encode('utf-8') + '.')
 
             elif giphyType:  # Giphy Search - GCSE API
@@ -479,7 +481,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendMessage(chat_id=chat_id, text=fullAnswer)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any answers for ' + requestText.encode('utf-8') + '.')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any answers for ' + requestText.encode('utf-8'))
 
             else:
                 pass
