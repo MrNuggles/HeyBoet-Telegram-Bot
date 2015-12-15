@@ -3,8 +3,8 @@ TELE_BOT_ID: {Your Telegram Bot ID here}
 
 Google
 GCSE_APP_ID: {Your Google Api Key here}
-GCSE_SE_ID: {Your Google Cutom Search Engine ID here}
-GCSE_XSE_ID: {Your x-rated Google Cutom Search Engine ID here}
+GCSE_SE_ID: {Your Google Custom Search Engine ID here}
+GCSE_XSE_ID: {Your x-rated Google Custom Search Engine ID here}
 
 Soundcloud
 SC_CLIENT_ID: {Your Soundcloud Api Key here}
