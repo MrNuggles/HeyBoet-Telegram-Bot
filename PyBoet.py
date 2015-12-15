@@ -1,4 +1,5 @@
 # coding=utf-8
+import httplib
 import logging
 
 import telegram
@@ -65,6 +66,8 @@ def main():
         except URLError as e:
             # These are network problems on our end.
             sleep(1)
+        except httplib.BadStatusLine as e:
+            sleep(1)
 
 
 def echo(bot, update_id, keyConfig):
@@ -86,34 +89,34 @@ def echo(bot, update_id, keyConfig):
         message = update.message.text
 
         if message:
-            mcType = message.lower() == '/mcstatus'  # Minecraft Server Status Command
-            bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
-            issposType = message.lower() == '/iss'  # ISS Position Command
-            currencyType = message.lower() == '/rand'  # Currency Command
-            figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
-            isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
+            mcType        = message.lower() == '/mcstatus'  # Minecraft Server Status Command
+            bcType        = message.lower() == '/bitcoin'  # Bitcoin Rate Command
+            issposType    = message.lower() == '/iss'  # ISS Position Command
+            currencyType  = message.lower() == '/rand'  # Currency Command
+            figType       = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
+            isisType      = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
 
             splitText = message.split(' ', 1)
 
-            wType = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
-            xType = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
-            imageType = splitText[0].lower() == '/get' if ' ' in message else False  # Fetch Random Picture Command
-            gifType = splitText[0].lower() == '/getgif' if ' ' in message else False  # Fetch GIF Command
-            giphyType = splitText[0].lower() == '/getgiphy' if ' ' in message else False  # Fetch Giphy GIF Command
-            hugeType = splitText[0].lower() == '/gethuge' if ' ' in message else False  # Fetch Large Picture Command
-            vidType = splitText[0].lower() == '/getvid' if ' ' in message else False  # Get Top Youtube Result Command
-            hugeGifType = splitText[0].lower() == '/gethugegif' if ' ' in message else False  # Fetch Large GIF Command
-            dicType = splitText[0].lower() == '/define' if ' ' in message else False  # Command To Define A Word
-            urbanDicType = splitText[0].lower() == '/urban' if ' ' in message else False  # Urban Dictionary Command
-            placeType = splitText[0].lower() == '/place' if ' ' in message else False  # Google Map Command
+            wType         = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
+            xType         = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
+            imageType     = splitText[0].lower() == '/get' if ' ' in message else False  # Fetch Random Picture Command
+            gifType       = splitText[0].lower() == '/getgif' if ' ' in message else False  # Fetch GIF Command
+            giphyType     = splitText[0].lower() == '/getgiphy' if ' ' in message else False  # Fetch Giphy GIF Command
+            hugeType      = splitText[0].lower() == '/gethuge' if ' ' in message else False  # Fetch Large Picture Command
+            vidType       = splitText[0].lower() == '/getvid' if ' ' in message else False  # Get Top Youtube Result Command
+            hugeGifType   = splitText[0].lower() == '/gethugegif' if ' ' in message else False  # Fetch Large GIF Command
+            dicType       = splitText[0].lower() == '/define' if ' ' in message else False  # Command To Define A Word
+            urbanDicType  = splitText[0].lower() == '/urban' if ' ' in message else False  # Urban Dictionary Command
+            placeType     = splitText[0].lower() == '/place' if ' ' in message else False  # Google Map Command
             translateType = splitText[0].lower() == '/translate' if ' ' in message else False  # Google translate Command
-            torrentType = splitText[0].lower() == '/torrent' if ' ' in message else False  # Torrent Search Command
-            wikiType = splitText[0].lower() == '/wiki' if ' ' in message else False  # Wiki Search Command
-            issType = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
-            soundType = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
-            bookType = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
-            movieType = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
-            updateType = splitText[0].lower() == '/update' if ' ' in message else False  # Self update
+            torrentType   = splitText[0].lower() == '/torrent' if ' ' in message else False  # Torrent Search Command
+            wikiType      = splitText[0].lower() == '/wiki' if ' ' in message else False  # Wiki Search Command
+            issType       = splitText[0].lower() == '/iss' if ' ' in message else False  # ISS Sightings Command
+            soundType     = splitText[0].lower() == '/getsound' if ' ' in message else False  # Get Sound from Soundcloud API Command
+            bookType      = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
+            movieType     = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
+            updateType    = splitText[0].lower() == '/update' if ' ' in message else False  # Self update
             answerType = splitText[0].lower() == '/getanswer' if ' ' in message else False  # An answer from Wolfram Alpha API
 
             requestText = splitText[1] if ' ' in message else ''
