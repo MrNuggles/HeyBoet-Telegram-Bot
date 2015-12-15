@@ -13,6 +13,7 @@ import datetime
 from mcstatus import MinecraftServer
 import soundcloud
 import feedparser
+import tungsten
 
 from time import sleep
 
@@ -113,6 +114,7 @@ def echo(bot, update_id, keyConfig):
             bookType = splitText[0].lower() == '/getbook' if ' ' in message else False  # Get Book from Google Books API Command
             movieType = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
             updateType = splitText[0].lower() == '/update' if ' ' in message else False  # Self update
+            answerType = splitText[0].lower() == '/getanswer' if ' ' in message else False  # An answer from Wolfram Alpha API
 
             requestText = splitText[1] if ' ' in message else ''
 
@@ -456,6 +458,21 @@ def echo(bot, update_id, keyConfig):
                 import sys
                 subprocess.call(["git", "pull"])
                 os.execv(sys.executable, sys.argv)
+
+            elif answerType:  # An answer from Wolfram Alpha API
+                client = tungsten.Tungsten(keyConfig.get('Wolfram', 'WOLF_API_KEY'))
+                result = client.query(requestText)
+                if len(result.pods) >=1:
+                    fullAnswer = ''
+                    for pod in result.pods:
+                        for answer in pod.format['plaintext']:
+                            if not answer == None:
+                                fullAnswer += answer.encode('utf-8')
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text=fullAnswer)
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any answers for ' + requestText.encode('utf-8'))
 
             else:
                 pass

@@ -11,3 +11,6 @@ SC_CLIENT_ID: {Your Soundcloud Api Key here}
 
 [HeyBoet]
 ADMIN_COMMAND_KEY: {Some key for running powerful admin commands}
+
+[Wolfram]
+WOLF_API_KEY: {Your Wolfram developer API key here}
