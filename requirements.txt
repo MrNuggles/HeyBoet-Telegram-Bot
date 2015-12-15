@@ -1,1 +1,3 @@
+feedparser
+soundcloud
 future
