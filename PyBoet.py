@@ -456,7 +456,7 @@ def echo(bot, update_id, keyConfig):
                         bot.sendMessage(chat_id=chat_id, text=data['Title'] + ':\n' + data['Plot'])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any movies for ' + requestText.encode('utf-8'))
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any movies for ' + requestText.encode('utf-8') + '.')
 
             elif updateType and requestText == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):  # Self update
                 urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id))
