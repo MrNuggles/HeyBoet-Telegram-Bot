@@ -52,7 +52,7 @@ def main():
                 sleep(1)
             elif e.message == "Unauthorized":
                 # The user has removed or blocked the bot.
-                if not update_id == None:
+                if update_id is not None:
                     update_id += 1
             elif e.message == "Could not parse file content":
                 # The file in the google search result link is not accessible.
@@ -160,7 +160,7 @@ def echo(bot, update_id, keyConfig):
                     bot.sendDocument(chat_id=chat_id, filename=requestText + '.gif', document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a gif for ' + requestText.encode('utf-8') + '.')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a giphy gif for ' + requestText.encode('utf-8') + '.')
 
             elif hugeType:  # Large Image Search - GCSE API
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
