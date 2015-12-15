@@ -318,13 +318,15 @@ def echo(bot, update_id, keyConfig):
                 tor1Url = 'https://torrentproject.se/?s='
                 searchUrl = tor1Url + requestText.encode('utf-8') + '&out=json'
                 data = json.load(urllib.urlopen(searchUrl))
+                torrageUrl = 'http://torrage.info/torrent.php?h='
                 if data['total_found'] >= 1 and '1' in data:
                     torrent = data['1']['torrent_hash']
                     tTitle = data['1']['title']
                     seeds = str(data['1']['seeds'])
                     leechs = str(data['1']['leechs'])
+                    downloadUrl = torrageUrl + torrent.upper()
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nTorrent Hash: ' + torrent + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs)
+                    bot.sendMessage(chat_id=chat_id, text='Torrent Name: ' + tTitle + '\nDownload Link: ' + downloadUrl + '\nSeeds: ' + seeds + '\nLeechers: ' + leechs, disable_web_page_preview=True)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I can\'t find any torrents for ' + requestText.encode('utf-8'))
@@ -335,7 +337,7 @@ def echo(bot, update_id, keyConfig):
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data[2]) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text=data[2][0])
+                    bot.sendMessage(chat_id=chat_id, text='Description: ' + data[2][0] + '\nLink: ' + data[3][0], disable_web_page_preview=True)
                 else:
                     wikiUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
                     realUrl = wikiUrl + requestText.encode('utf-8')
