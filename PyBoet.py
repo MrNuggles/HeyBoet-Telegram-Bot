@@ -50,7 +50,8 @@ def main():
                 sleep(1)
             elif e.message == "Unauthorized":
                 # The user has removed or blocked the bot.
-                update_id += 1
+                if not update_id == None:
+                    update_id += 1
             elif e.message == "Could not parse file content":
                 # The file in the google search result link is not accessible.
                 sleep(1)
@@ -70,11 +71,11 @@ def echo(bot, update_id, keyConfig):
     allUpdates = bot.getUpdates()
     for update in allUpdates:
         if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
-            newIdAfterReset = allUpdates[-1].update_id + 1
-            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(newIdAfterReset)))
+            lastUpdateId = allUpdates[-1].update_id + 1
+            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(lastUpdateId)))
             bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
             bot.sendMessage(chat_id=update.message.chat_id, text='Message queue reset.' if data['ok'] else 'Reset failed.')
-            return newIdAfterReset
+            return lastUpdateId
 
     # Request updates after the last update_id
     for update in allUpdates:
@@ -120,7 +121,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= 1:
+                if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
@@ -132,7 +133,7 @@ def echo(bot, update_id, keyConfig):
                           'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= 1:
+                if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
@@ -157,7 +158,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= 1:
+                if 'items' in data:
                     imagelink = data['items'][0]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
@@ -170,7 +171,7 @@ def echo(bot, update_id, keyConfig):
                  'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=xlarge" + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
-                if data['searchInformation']['totalResults'] >= 1:
+                if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'), document=imagelink.encode('utf-8'))
@@ -184,7 +185,7 @@ def echo(bot, update_id, keyConfig):
                     ('Google', 'GCSE_APP_ID') + '&part=snippet&q='
                 realUrl = vidurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if len(data['items']) >= 1:
+                if 'items' in data and len(data['items']) >= 1:
                     vidlink = data['items'][0]['id']['videoId']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='https://www.youtube.com/watch?v=' + vidlink + '&type=video')
@@ -459,6 +460,9 @@ def echo(bot, update_id, keyConfig):
             else:
                 pass
 
+    if not update_id == None and len(allUpdates) >= 1:
+        data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id)))
+        print ('Flushed all until command #' if data['ok'] else 'Failed to flush all until command #' ) + str(update_id) + '\nSee: https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates'
     return update_id
 
 if __name__ == '__main__':
