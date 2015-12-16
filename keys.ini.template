@@ -1,6 +1,9 @@
 [Telegram]
 TELE_BOT_ID: {Your Telegram Bot ID here}
 
+[HeyBoet]
+ADMIN_COMMAND_KEY: {Some key for running powerful admin commands}
+
 [Google]
 GCSE_APP_ID: {Your Google Api Key here}
 GCSE_SE_ID: {Your Google Custom Search Engine ID here}
@@ -9,8 +12,9 @@ GCSE_XSE_ID: {Your x-rated Google Custom Search Engine ID here}
 [Soundcloud]
 SC_CLIENT_ID: {Your Soundcloud Api Key here}
 
-[HeyBoet]
-ADMIN_COMMAND_KEY: {Some key for running powerful admin commands}
-
 [Wolfram]
 WOLF_APP_ID: {Your Wolfram developer API key here}
+
+[Imgur]
+CLIENT_ID: {Imgur Client ID goes here}
+CLIENT_SECRET: {Imgur Client Secret goes here}
