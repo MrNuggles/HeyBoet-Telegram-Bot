@@ -8,11 +8,12 @@ import urllib2
 import random
 import ConfigParser
 import MLStripper
-import simplejson
 import datetime
 import soundcloud
 import feedparser
 import tungsten
+import requests
+
 from imgurpython import ImgurClient
 from time import sleep
 
@@ -133,7 +134,7 @@ def echo(bot, update_id, keyConfig):
                 if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText.encode('utf-8'))
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText.title().encode('utf-8'))
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find any images for '
                                                           + requestText.encode('utf-8'))
@@ -142,25 +143,24 @@ def echo(bot, update_id, keyConfig):
                 client_id = keyConfig.get('Imgur', 'CLIENT_ID')
                 client_secret = keyConfig.get('Imgur', 'CLIENT_SECRET')
                 client = ImgurClient(client_id, client_secret)
-                items = client.gallery_search(q=requestText.encode('utf-8'), advanced=None, sort='top', window='all',
+                items = client.gallery_search(q=requestText.encode('utf-8'), advanced={'q_type': 'anigif'}, sort='top', window='all',
                                               page=random.randint(0, 9))
                 for item in items:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendMessage(chat_id=chat_id, text="[" + requestText.title().encode('utf-8') + "](" + item.link.
-                                    encode('utf-8') + ")", parse_mode=telegram.ParseMode.MARKDOWN)
+                    bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8'),
+                                     document=item.link.encode('utf-8'))
                     print(item.link)
-                    pass
 # -----------------------------------------------GIF Search : GCSE API--------------------------------------------------
             elif gifType:
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
-                          'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_I'
-                                                                                                            'D') + '&q='
+                          'cx=' + keyConfig.get('Google', 'GCSE_SE_ID') + '&key=' + keyConfig.get('Google',
+                                                                                                  'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8') + "&fileType=gif"
                 data = json.load(urllib.urlopen(realUrl))
                 if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'),
+                    bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8'),
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -191,8 +191,7 @@ def echo(bot, update_id, keyConfig):
                 if 'items' in data:
                     imagelink = data['items'][0]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText + (
-                    '' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
+                    bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=requestText.title().encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry Dave, I\'m afraid I can\'t find a huge image for ' +
