@@ -176,7 +176,8 @@ def echo(bot, update_id, keyConfig):
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find a gif for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find a gif for ' +
                                                           requestText.encode('utf-8') + '.')
 # --------------------------------------------------Giphy Search : GCSE API---------------------------------------------
             elif giphyType:
@@ -191,7 +192,8 @@ def echo(bot, update_id, keyConfig):
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find a giphy gif for '+
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find a giphy gif for '+
                                                           requestText.encode('utf-8') + '.')
 # ------------------------------------------------Large Image Search : GCSE API-----------------------------------------
             elif hugeType:
@@ -207,7 +209,8 @@ def echo(bot, update_id, keyConfig):
                                                                                             requestText.title().encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find a huge image for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find a huge image for ' +
                                          requestText.encode('utf-8') + '.')
 # ---------------------------------------------Large GIF Search : GCSE API----------------------------------------------
             elif hugeGifType:
@@ -223,7 +226,8 @@ def echo(bot, update_id, keyConfig):
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any huge gifs for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find any huge gifs for ' +
                                          requestText.encode('utf-8') + '.')
 # -------------------------------------------Video Search : YouTube API-------------------------------------------------
             elif vidType:
@@ -239,14 +243,16 @@ def echo(bot, update_id, keyConfig):
                                                           'https://www.youtube.com/watch?v=' + vidlink + '&type=video')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t do that.\n(Video not found)')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t do that.\n(Video not found)')
 # --------------------------------------------------Weather : Yahoo API-------------------------------------------------
             elif wType:  #
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                yahoourl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20" \
-                           "in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode(
-                            'utf-8') + "%27)%20" \
-                            "and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
+                yahoourl = \
+                    "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20" \
+                    "in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode(
+                    'utf-8') + "%27)%20" \
+                    "and%20u%3D%27c%27&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys"
                 result = urllib.urlopen(yahoourl).read()
                 data = json.loads(result)
                 if data['query']['count'] == 1:
@@ -255,14 +261,16 @@ def echo(bot, update_id, keyConfig):
                     city = data['query']['results']['channel']['location']['city']
                     astronomy = data['query']['results']['channel']['astronomy']
                     bot.sendMessage(chat_id=chat_id, text=((user + ': ' if not user == '' else '') +
-                                                           'It is currently ' + weather['text'] + ' in ' + city + ' with a temperature of '
+                                                           'It is currently ' + weather['text'] + ' in ' + city +
+                                                           ' with a temperature of '
                     + weather['temp'] + 'C.\nA high of ' + forecast[0]['high'] + ' and a low of ' +
                     forecast[0]['low'] + ' are expected during the day with conditions being ' +
                     forecast[0]['text'] + '.\nSunrise: ' + astronomy['sunrise'] + '\nSunset: ' +
                     astronomy['sunset']))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I don\'t know the place ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I don\'t know the place ' +
                                                           requestText.encode('utf-8') + '.')
 # ----------------------------------------------Porn Search : GCSE API--------------------------------------------------
             elif xType:
@@ -288,7 +296,8 @@ def echo(bot, update_id, keyConfig):
                             bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') + xlink)
                             break
                 else:
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', you\'re just too filthy.')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', you\'re just too filthy.')
 # -------------------------------------------Dictionary : DictionaryAPI.net---------------------------------------------
             elif dicType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -306,12 +315,14 @@ def echo(bot, update_id, keyConfig):
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id,
-                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any definitions for the word ' +
+                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                             ', I\'m afraid I can\'t find any definitions for the word ' +
                                              requestText + '.')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any definitions for the word ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any definitions for the word ' +
                                          requestText + '.')
 # -----------------------------------------------Urban Dictionary : Urban API-------------------------------------------
             elif urbanDicType:
@@ -329,7 +340,8 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any urban definitions for ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any urban definitions for ' +
                                          requestText.encode('utf-8') + '.')
 # ---------------------------------------------Google Maps Places API---------------------------------------------------
             elif placeType:
@@ -345,7 +357,8 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any places for ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any places for ' +
                                          requestText.encode('utf-8') + '.')
 # --------------------------------------------------Google Translate API------------------------------------------------
             elif translateType:
@@ -367,7 +380,8 @@ def echo(bot, update_id, keyConfig):
                                                           "\nMeaning: " + translation.title())
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any translations for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find any translations for ' +
                                          requestText.encode('utf-8') + '.')
 # -----------------------------------------Current Bitcoin Price - CoinDesk API-----------------------------------------
             elif bcType:
@@ -382,7 +396,8 @@ def echo(bot, update_id, keyConfig):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 bot.sendMessage(chat_id=chat_id,
                                 text=(user + ': ' if not user == '' else '') +
-                                     'The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] + ' USD\n' + priceGB['rate'] +
+                                     'The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] +
+                                     ' USD\n' + priceGB['rate'] +
                                      ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 # --------------------------------Torrent Search + Fetch : Strike + TorrentProject API----------------------------------
             elif torrentType:
@@ -403,11 +418,13 @@ def echo(bot, update_id, keyConfig):
                                          seeds + '\nLeechers: ' + leechs, disable_web_page_preview=True)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I can\'t find any torrents for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I can\'t find any torrents for ' +
                                                           requestText.encode('utf-8') + '.')
 # ----------------------------------------------------Wikipedia API-----------------------------------------------------
             elif wikiType:
-                wikiUrl = 'https://simple.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
+                wikiUrl = \
+                    'https://simple.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
                 realUrl = wikiUrl + requestText.encode('utf-8')
                 print realUrl
                 data = json.load(urllib.urlopen(realUrl))
@@ -417,7 +434,8 @@ def echo(bot, update_id, keyConfig):
                                                           'Description: ' + data[2][0] + '\nLink: ' + data[3][0],
                                     disable_web_page_preview=True)
                 else:
-                    wikiUrl = 'https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
+                    wikiUrl = \
+                        'https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
                     realUrl = wikiUrl + requestText.encode('utf-8')
                     data = json.load(urllib.urlopen(realUrl))
                     if len(data[2]) >= 1 and not data[2][0] == '':
@@ -426,7 +444,8 @@ def echo(bot, update_id, keyConfig):
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id,
-                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any wiki articles for ' +
+                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                             ', I\'m afraid I can\'t find any wiki articles for ' +
                                              requestText.encode('utf-8') + '.')
 # -----------------------------------# ISS Spotting : Open Notify + Google Maps API-------------------------------------
             elif issType:
@@ -454,12 +473,14 @@ def echo(bot, update_id, keyConfig):
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id,
-                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find the next ISS sighting for ' +
+                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                             ', I\'m afraid I can\'t find the next ISS sighting for ' +
                                              requestText.encode('utf-8') + '.')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any places for ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any places for ' +
                                          requestText.encode('utf-8') + '.')
 # -----------------------------------------------------Soundcloud API---------------------------------------------------
             elif soundType:
@@ -472,14 +493,15 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find the sound of ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find the sound of ' +
                                          requestText.encode('utf-8') + '.')
 # ----------------------------------------------------ISS Position------------------------------------------------------
             elif issposType:
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  bot.sendPhoto(chat_id=chat_id,
-                               photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544',
-                               caption=(user + ': ' if not user == '' else '') + 'Current Position of the ISS')
+                       photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544',
+                       caption=(user + ': ' if not user == '' else '') + 'Current Position of the ISS')
 # ----------------------------------------Currency Converter : fixer.io API---------------------------------------------
             elif currencyType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -513,7 +535,8 @@ def echo(bot, update_id, keyConfig):
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') + googleBooksUrl)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any books for ' +
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find any books for ' +
                                                           requestText.encode('utf-8') + '.')
 # ----------------------------------------------Fig Search : GCSE API---------------------------------------------------
             elif figType:
@@ -526,10 +549,12 @@ def echo(bot, update_id, keyConfig):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'),
                                   caption=(user if not user == '' else '') +
-                                          ('' if len(imagelink.encode('utf-8')) > 100 else ': ' + imagelink.encode('utf-8')))
+                                          ('' if len(imagelink.encode('utf-8')) > 100 else ': ' +
+                                                                                           imagelink.encode('utf-8')))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any figs.')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find any figs.')
 # ----------------------------------------------ISIS news RSS feed------------------------------------------------------
             elif isisType:
                 realUrl = 'http://isis.liveuamap.com/rss'
@@ -540,15 +565,17 @@ def echo(bot, update_id, keyConfig):
                                                           data.entries[random.randint(0, 9)].link)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any ISIS news.')
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                          ', I\'m afraid I can\'t find any ISIS news.')
 # ---------------------------------------------Movie from  OMDB API-----------------------------------------------------
             elif movieType:
                 movieUrl = 'http://www.omdbapi.com/?plot=short&r=json&y=&t='
                 realUrl = movieUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if 'Error' not in data:
-                    if 'Poster' in data:
+                    if 'Poster' in data and not data['Poster'] == 'N/A':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        print data['Poster']
                         bot.sendPhoto(chat_id=chat_id, photo=data['Poster'],
                                       caption=(user if not user == '' else '') + data['Title'] + ':\n' + data['Plot'])
                     else:
@@ -558,7 +585,8 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any movies for ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any movies for ' +
                                          requestText.encode('utf-8') + '.')
 # ---------------------------------------------------Self update Service------------------------------------------------
             elif updateType and requestText == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):  #
@@ -585,7 +613,8 @@ def echo(bot, update_id, keyConfig):
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id,
-                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') + ', I\'m afraid I can\'t find any answers for ' +
+                                    text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t find any answers for ' +
                                          requestText.encode('utf-8'))
 # ----------------------------------------------------------------------------------------------------------------------
             else:
