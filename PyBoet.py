@@ -292,6 +292,7 @@ def echo(bot, update_id, keyConfig):
                                 and 'xhamster.com/stories_search' not in xlink \
                                 and 'xvideos.com/tags' not in xlink \
                                 and 'redtube.com/pornstar/' not in xlink \
+                                and 'xvideos.com/favorite/' not in xlink \
                                 :
                             bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') + xlink)
                             break
