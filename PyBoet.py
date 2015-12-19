@@ -626,7 +626,25 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                         adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
                         requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
                     moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
-                    realUrl = moveUrl + requestText.lower().encode('utf-8')
+                    formatedRequestText = requestText.lower()\
+                        .replace('a', 'i')\
+                        .replace('b', 'j')\
+                        .replace('c', 'k')\
+                        .replace('d', 'l')\
+                        .replace('e', 'm')\
+                        .replace('f', 'n')\
+                        .replace('g', 'o')\
+                        .replace('h', 'p')
+                    formatedRequestText = formatedRequestText\
+                        .replace('i', 'h')\
+                        .replace('j', 'g')\
+                        .replace('k', 'f')\
+                        .replace('l', 'e')\
+                        .replace('m', 'd')\
+                        .replace('n', 'c')\
+                        .replace('o', 'b')\
+                        .replace('p', 'a')
+                    realUrl = moveUrl + formatedRequestText.encode('utf-8')
                     moveResponse = (urllib.urlopen(realUrl)).read()
                     isMoveValid = not moveResponse.startswith('invalid')
                     if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
@@ -635,7 +653,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                             if update.message.chat.id in lastUserWhoMoved and lastUserWhoMoved[update.message.chat.id] == user:
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
-                                             ', I\'m afraid I can\'t let you make more than one chess move in a row in a group.')
+                                             ', I\'m afraid I can\'t let you make more than one sequential chess move in a group.')
                                 userRestricted = True
                             else:
                                 lastUserWhoMoved[update.message.chat.id] = user
@@ -648,14 +666,32 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                                            caption='Bottom Left: A1. Top Right: H8')
+                                                            caption='Top Left: A1. Bottom Right: H8')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
+                                formatedmovesList = movesList\
+                                    .replace('a', 'i')\
+                                    .replace('b', 'j')\
+                                    .replace('c', 'k')\
+                                    .replace('d', 'l')\
+                                    .replace('e', 'm')\
+                                    .replace('f', 'n')\
+                                    .replace('g', 'o')\
+                                    .replace('h', 'p')
+                                formatedmovesList = formatedmovesList\
+                                    .replace('i', 'h')\
+                                    .replace('j', 'g')\
+                                    .replace('k', 'f')\
+                                    .replace('l', 'e')\
+                                    .replace('m', 'd')\
+                                    .replace('n', 'c')\
+                                    .replace('o', 'b')\
+                                    .replace('p', 'a')
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                                       ', I\'m afraid that chess move is invalid. List of valid moves:\n' +
-                                                                      movesList[len('validmoves'):])
+                                                                      formatedmovesList[len('validmoves'):])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry whoever you are, I\'m afraid' +
@@ -670,7 +706,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                              caption='Bottom Left: A1. Top Right: H8')
+                              caption='Top Left: A1. Bottom Right: H8')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
