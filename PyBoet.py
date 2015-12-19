@@ -624,6 +624,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     adminOverride = False
                     if len(requestText.split(' ', 1)) > 1:
                         adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
+                        requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'))
                     if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
                         userRestricted = False
                         if update.message.chat.type == 'group':
@@ -634,7 +635,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 userRestricted = True
                             else:
                                 lastUserWhoMoved[update.message.chat.id] = user
-                        if not userRestricted:
+                        if not userRestricted or adminOverride:
                             moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
                             realUrl = moveUrl + requestText.encode('utf-8')
                             moveResponse = (urllib.urlopen(realUrl)).read()
@@ -646,13 +647,13 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                              caption='Bottom is 1, top is 8\nLeft is a, right is h')
+                                                            caption='Bottom is 1, top is 8\nLeft is a, right is h')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
-                                             ', I\'m afraid that chess move is invalid. List of valid moves:\n' +
+                                                                      ', I\'m afraid that chess move is invalid. List of valid moves:\n' +
                                                                       movesList[len('validmoves'):])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
