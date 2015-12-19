@@ -42,9 +42,11 @@ def main():
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+    lastUserWhoMoved = {}
+
     while True:
         try:
-            update_id = echo(bot, update_id, KeyConfig)
+            update_id = echo(bot, update_id, KeyConfig, lastUserWhoMoved)
         except telegram.TelegramError as e:
             # These are network problems with Telegram.
             if e.message in ("Bad Gateway", "Timed out"):
@@ -71,7 +73,7 @@ def main():
             sleep(1)
 
 
-def echo(bot, update_id, keyConfig):
+def echo(bot, update_id, keyConfig, lastUserWhoMoved):
     # Sense reset
     allUpdates = bot.getUpdates()
     for update in allUpdates:
@@ -103,6 +105,7 @@ def echo(bot, update_id, keyConfig):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
+            chessBoardType = message.lower() == '/chessmove'  # Currency Command
 
             wType = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
             xType = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
@@ -124,7 +127,8 @@ def echo(bot, update_id, keyConfig):
             movieType = splitText[0].lower() == '/getmovie' if ' ' in message else False  # Get movie from OMDB API Command
             updateType = splitText[0].lower() == '/update' if ' ' in message else False  # Self update
             answerType = splitText[0].lower() == '/getanswer' if ' ' in message else False  # An answer from Wolfram Alpha API
-            imgurType = splitText[0].lower() == '/imgur' if ' ' in message else False
+            imgurType = splitText[0].lower() == '/imgur' if ' ' in message else False # Imgur API
+            chessType = splitText[0].lower() == '/chessmove' if ' ' in message else False # Riot's chess API
 
             figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
             isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -576,7 +580,6 @@ def echo(bot, update_id, keyConfig):
                 if 'Error' not in data:
                     if 'Poster' in data and not data['Poster'] == 'N/A':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                        print data['Poster']
                         bot.sendPhoto(chat_id=chat_id, photo=data['Poster'],
                                       caption=(user if not user == '' else '') + data['Title'] + ':\n' + data['Plot'])
                     else:
@@ -617,6 +620,43 @@ def echo(bot, update_id, keyConfig):
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any answers for ' +
                                          requestText.encode('utf-8'))
+# ----------------------------------------------------------------------------------------------------------------------
+            elif chessType:
+                if (requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] \
+                        or requestText.split(' ', 1)[1]
+                    if len(requestText.split(' ', 1)) > 1
+                    else True == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')):
+                    userRestricted = False
+                    if update.message.chat.type == 'group':
+                        if update.message.chat.id in lastUserWhoMoved and \
+                                        lastUserWhoMoved[update.message.chat.id] == user:
+                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                            bot.sendMessage(chat_id=chat_id, text=user + ': Let someone else have a turn.')
+                            userRestricted = True
+                        else:
+                            lastUserWhoMoved[update.message.chat.id] = user
+                    if not userRestricted:
+                        moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
+                        realUrl = moveUrl + requestText.encode('utf-8')
+                        urllib.urlopen(realUrl)
+                        boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                        boardResponse = (urllib.urlopen(boardUrl)).read()
+                        boardImageUrl = str(boardResponse.split(' ', 1)[1])
+                        boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
+                                                             urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
+                                      caption='Bottom is 1, top is 8\nLeft is a, right is h')
+# ----------------------------------------------------------------------------------------------------------------------
+            elif chessBoardType:
+                boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                boardResponse = (urllib.urlopen(boardUrl)).read()
+                boardImageUrl = str(boardResponse.split(' ', 1)[1])
+                boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
+                                                     urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
+                              caption='Bottom is 1, top is 8\nLeft is a, right is h')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
