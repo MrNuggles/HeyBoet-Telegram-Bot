@@ -624,7 +624,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     adminOverride = False
                     if len(requestText.split(' ', 1)) > 1:
                         adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
-                        requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'))
+                        requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
                     if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
                         userRestricted = False
                         if update.message.chat.type == 'group':
