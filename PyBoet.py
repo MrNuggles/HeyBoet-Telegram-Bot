@@ -105,7 +105,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
-            chessBoardType = message.lower() == '/chessmove'  # Currency Command
+            chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
             wType = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
             xType = splitText[0].lower() == '/getxxx' if ' ' in message else False  # Get Porn Command
@@ -647,7 +647,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                                            caption='Bottom is 1, top is 8\nLeft is a, right is h')
+                                                            caption='Bottom is 1, top is 8, left is a, right is h')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
@@ -669,7 +669,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                              caption='Bottom is 1, top is 8\nLeft is a, right is h')
+                              caption='Bottom is 1, top is 8, left is a, right is h')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
