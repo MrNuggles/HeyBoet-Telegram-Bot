@@ -625,9 +625,13 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     if len(requestText.split(' ', 1)) > 1:
                         adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
                         requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
+                    moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
+                    realUrl = moveUrl + requestText.lower().encode('utf-8')
+                    moveResponse = (urllib.urlopen(realUrl)).read()
+                    isMoveValid = not moveResponse.startswith('invalid')
                     if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
                         userRestricted = False
-                        if update.message.chat.type == 'group' and not adminOverride:
+                        if update.message.chat.type == 'group' and not adminOverride and isMoveValid:
                             if update.message.chat.id in lastUserWhoMoved and lastUserWhoMoved[update.message.chat.id] == user:
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
@@ -636,10 +640,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                             else:
                                 lastUserWhoMoved[update.message.chat.id] = user
                         if not userRestricted or adminOverride:
-                            moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
-                            realUrl = moveUrl + requestText.encode('utf-8')
-                            moveResponse = (urllib.urlopen(realUrl)).read()
-                            if not moveResponse.startswith('invalid'):
+                            if isMoveValid:
                                 boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
                                 boardResponse = (urllib.urlopen(boardUrl)).read()
                                 boardImageUrl = str(boardResponse.split(' ', 1)[1])
@@ -647,7 +648,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                                            caption='Bottom is 1, top is 8, left is a, right is h')
+                                                            caption='Bottom Left: A1. Top Right: H8')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
@@ -669,7 +670,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                              caption='Bottom is 1, top is 8, left is a, right is h')
+                              caption='Bottom Left: A1. Top Right: H8')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
