@@ -627,7 +627,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                         requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
                     if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
                         userRestricted = False
-                        if update.message.chat.type == 'group':
+                        if update.message.chat.type == 'group' and not adminOverride:
                             if update.message.chat.id in lastUserWhoMoved and lastUserWhoMoved[update.message.chat.id] == user:
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
