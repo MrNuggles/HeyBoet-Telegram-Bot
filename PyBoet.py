@@ -165,7 +165,6 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8'),
                                      document=item.link.encode('utf-8'))
-                    print(item.link)
 # -----------------------------------------------GIF Search : GCSE API--------------------------------------------------
             elif gifType:
                 googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
@@ -431,7 +430,6 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 wikiUrl = \
                     'https://simple.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search='
                 realUrl = wikiUrl + requestText.encode('utf-8')
-                print realUrl
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data[2]) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -622,31 +620,39 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                          requestText.encode('utf-8'))
 # ----------------------------------------------------------------------------------------------------------------------
             elif chessType:
-                if (requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] \
-                        or requestText.split(' ', 1)[1]
-                    if len(requestText.split(' ', 1)) > 1
-                    else True == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')):
+                adminOverride = False
+                if len(requestText.split(' ', 1)) > 1:
+                    adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
+                if requestText not in ['clear', 'back', 'wwyd', 'history', 'status', 'moves', 'fen', 'board'] or adminOverride:
                     userRestricted = False
                     if update.message.chat.type == 'group':
-                        if update.message.chat.id in lastUserWhoMoved and \
-                                        lastUserWhoMoved[update.message.chat.id] == user:
+                        if update.message.chat.id in lastUserWhoMoved and lastUserWhoMoved[update.message.chat.id] == user:
                             bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                            bot.sendMessage(chat_id=chat_id, text=user + ': Let someone else have a turn.')
+                            bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid I can\'t let you make more than one chess move in a row in a group.')
                             userRestricted = True
                         else:
                             lastUserWhoMoved[update.message.chat.id] = user
                     if not userRestricted:
                         moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
                         realUrl = moveUrl + requestText.encode('utf-8')
-                        urllib.urlopen(realUrl)
-                        boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
-                        boardResponse = (urllib.urlopen(boardUrl)).read()
-                        boardImageUrl = str(boardResponse.split(' ', 1)[1])
-                        boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
-                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                        bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
-                                                             urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                      caption='Bottom is 1, top is 8\nLeft is a, right is h')
+                        moveResponse = (urllib.urlopen(realUrl)).read()
+                        if not moveResponse.startswith('invalid'):
+                            boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                            boardResponse = (urllib.urlopen(boardUrl)).read()
+                            boardImageUrl = str(boardResponse.split(' ', 1)[1])
+                            boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
+                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                            bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
+                                                                 urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
+                                          caption='Bottom is 1, top is 8\nLeft is a, right is h')
+                        else:
+                            movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                            movesList = (urllib.urlopen(movesUrl)).read()
+                            bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                            bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                         ', I\'m afraid that chess move is invalid. List of valid moves:\n' +
+                                                                  movesList[len('validmoves'):])
 # ----------------------------------------------------------------------------------------------------------------------
             elif chessBoardType:
                 boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
