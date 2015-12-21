@@ -65,7 +65,11 @@ def main():
             elif e.message in ("Bad Request: text is empty"):
                 continue
             else:
-                raise e
+                print e.message
+                if update_id is not None:
+                    update_id += 1
+                continue
+                # raise e
         except URLError as e:
             # These are network problems on our end.
             sleep(1)
