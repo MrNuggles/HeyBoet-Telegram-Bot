@@ -94,6 +94,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
             issposType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
+
             chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
             wType = splitText[0].lower() == '/getweather' if ' ' in message else False  # Get Weather Command
@@ -483,10 +484,12 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 if len(data['query']['search']) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
-                    messageText = (user + ': ' if not user == '' else '') + MLStripper.strip_tags(
+                    formattedQuoteSnippet = MLStripper.strip_tags(
                         data['query']['search'][0]['snippet'].replace('<span class="searchmatch">', '*').replace(
-                            '</span>', '*')) + '\nhttps://simple.wikiquote.org/wiki/' + urllib.quote(
-                        data['query']['search'][0]['title'].encode('utf-8'))
+                            '</span>', '*'))
+                    messageText = (user + ': ' if not user == '' else '') + formattedQuoteSnippet + \
+                                  '\nhttps://simple.wikiquote.org/wiki/' + \
+                                  urllib.quote(data['query']['search'][0]['title'].encode('utf-8'))
                     bot.sendMessage(chat_id=chat_id, text=messageText,
                                     disable_web_page_preview=True, parse_mode='Markdown')
                 else:
@@ -497,11 +500,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     if len(data['query']['search']) >= 1:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         userWithCurrentChatAction = chat_id
-                        bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
-                                                               MLStripper.strip_tags(data['query']['search'][0]['snippet']
-                                                                                     .replace('<span class="searchmatch">', '*')
-                                                                                     .replace('</span>', '*')) +
-                                                              '\nhttps://en.wikiquote.org/wiki/' + urllib.quote(data['query']['search'][0]['title'].encode('utf-8')),
+                        formattedQuoteSnippet = MLStripper.strip_tags(
+                            data['query']['search'][0]['snippet'].replace('<span class="searchmatch">', '*').replace(
+                                '</span>', '*'))
+                        messageText = (user + ': ' if not user == '' else '') + formattedQuoteSnippet + \
+                                      '\nhttps://en.wikiquote.org/wiki/' + \
+                                      urllib.quote(data['query']['search'][0]['title'].encode('utf-8'))
+                        bot.sendMessage(chat_id=chat_id, text=messageText,
                                         disable_web_page_preview=True, parse_mode='Markdown')
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -779,7 +784,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry whoever you are, I\'m afraid' +
                                                           ' you must have a username to be trusted' +
                                                           'enough to make chess moves.')
-# ----------------------------------------------------------------------------------------------------------------------
+# ---------------------------------View the current state of the chess game---------------------------------------------
             elif chessBoardType:
                 boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
                 boardResponse = (urllib.urlopen(boardUrl)).read()
@@ -792,7 +797,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                               caption='Top Left: A1. Bottom Right: H8')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
-                pass
+                return
     return
 
 
