@@ -184,7 +184,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 realUrl = giphyUrl + requestText.encode('utf-8') + apiKey
                 data = json.load(urllib.urlopen(realUrl))
                 if data['pagination']['total_count'] >= 1:
-                    imagelink = data['data'][random.randint(0, len(data) - 1)]['images']['original']['url']
+                    imagelink = data['data'][random.randint(0, len(data['data']) - 1)]['images']['original']['url']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_DOCUMENT)
                     userWithCurrentChatAction = chat_id
                     bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8') + '.gif',
