@@ -3,6 +3,7 @@ TELE_BOT_ID: {Your Telegram Bot ID here}
 
 [HeyBoet]
 ADMIN_COMMAND_KEY: {Some key for running powerful admin commands}
+ADMIN_GROUP_CHAT_ID:
 
 [Google]
 GCSE_APP_ID: {Your Google Api Key here}

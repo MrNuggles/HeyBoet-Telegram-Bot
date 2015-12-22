@@ -22,6 +22,7 @@ try:
 except ImportError:
     from urllib2 import URLError  # python 2
 
+userWithCurrentChatAction = ''
 
 def main():
     # Read keys.ini file at program start (don't forget to put your keys in there!)
@@ -31,14 +32,6 @@ def main():
     # Telegram Bot Authorization Token
     bot = telegram.Bot(KeyConfig.get('Telegram', 'TELE_BOT_ID'))
 
-    # get the first pending update_id, this is so we can skip over it in case
-    # we get an "Unauthorized" exception.
-    try:
-        update_id = bot.getUpdates()[0].update_id
-
-    except IndexError:
-        update_id = None
-
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -46,51 +39,43 @@ def main():
 
     while True:
         try:
-            update_id = echo(bot, update_id, KeyConfig, lastUserWhoMoved)
+            getUpdatesLoop(bot, KeyConfig, lastUserWhoMoved)
         except telegram.TelegramError as e:
-            # These are network problems with Telegram.
-            if e.message in ("Bad Gateway", "Timed out"):
-                sleep(1)
-            elif e.message == "Unauthorized":
-                # The user has removed or blocked the bot.
-                if update_id is not None:
-                    update_id += 1
-            elif e.message == "Could not parse file content":
-                # The file in the google search result link is not accessible.
-                sleep(1)
-            elif e.message in ("Unknown HTTPError"):
-                pass
-            elif e.message in ("PHOTO_SAVE_FILE_INVALID"):
-                continue
-            elif e.message in ("Bad Request: text is empty"):
-                continue
-            else:
-                print e.message
-                if update_id is not None:
-                    update_id += 1
-                continue
-                # raise e
+            bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I\'m afraid I experienced an error!' )
+            if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
+                bot.sendMessage(chat_id=userWithCurrentChatAction, text=e.message)
+            continue
         except URLError as e:
             # These are network problems on our end.
-            sleep(1)
+            raise e
         except httplib.BadStatusLine as e:
-            sleep(1)
+            raise e
 
 
-def echo(bot, update_id, keyConfig, lastUserWhoMoved):
-    # Sense reset
-    allUpdates = bot.getUpdates()
-    for update in allUpdates:
-        if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
-            lastUpdateId = allUpdates[-1].update_id + 1
-            data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
-                                            '/getUpdates?offset=' + str(lastUpdateId)))
-            bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-            bot.sendMessage(chat_id=update.message.chat_id,
-                            text='Message queue reset.' if data['ok'] else 'Reset failed.')
-            return lastUpdateId
+def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
+    # Keep track of the last user to receive a chat action.
+    # Force all chat actions to resolve even on error.
+    global userWithCurrentChatAction
 
     # Request updates after the last update_id
+    allUpdates = bot.getUpdates()
+
+    # Reset updates after the last update_id
+    if len(allUpdates) >= 1:
+        lastUpdateId = allUpdates[-1].update_id + 1
+        data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
+                                        '/getUpdates?offset=' + str(lastUpdateId)))
+
+    # If reset
+    for update in allUpdates:
+        if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
+            bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
+            userWithCurrentChatAction = update.message.chat_id
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            text='Message queue reset.' if data['ok'] else 'Reset failed.')
+            return
+
+    # If not reset then process the whole update queue sequentially
     for update in allUpdates:
         # chat_id is required to reply to any message
         chat_id = update.message.chat_id
@@ -149,6 +134,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=(user + ': ' if not user == '' else '') +
                                                                                             requestText.title()
                                   .encode('utf-8'))
@@ -168,6 +154,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                               page=random.randint(0, 9))
                 for item in items:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8'),
                                      document=item.link.encode('utf-8'))
 # -----------------------------------------------GIF Search : GCSE API--------------------------------------------------
@@ -180,10 +167,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8'),
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find a gif for ' +
                                                           requestText.encode('utf-8') + '.')
@@ -196,10 +185,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if data['pagination']['total_count'] >= 1:
                     imagelink = data['data'][random.randint(0, len(data) - 1)]['images']['original']['url']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_DOCUMENT)
+                    userWithCurrentChatAction = chat_id
                     bot.sendDocument(chat_id=chat_id, filename=requestText.encode('utf-8') + '.gif',
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find a giphy gif for '+
                                                           requestText.encode('utf-8') + '.')
@@ -213,10 +204,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'items' in data:
                     imagelink = data['items'][0]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=(user + ': ' if not user == '' else '') +
                                                                                             requestText.title().encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find a huge image for ' +
                                          requestText.encode('utf-8') + '.')
@@ -230,16 +223,19 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'items' in data and len(data['items']) >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendDocument(chat_id=chat_id, filename=requestText + ': ' + imagelink.encode('utf-8'),
                                      document=imagelink.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any huge gifs for ' +
                                          requestText.encode('utf-8') + '.')
 # -------------------------------------------Video Search : YouTube API-------------------------------------------------
             elif vidType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 vidurl = 'https://www.googleapis.com/youtube/v3/search?safeSearch=none&type=video&key=' + keyConfig.get \
                     ('Google', 'GCSE_APP_ID') + '&part=snippet&q='
                 realUrl = vidurl + requestText.encode('utf-8')
@@ -247,15 +243,18 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'items' in data and len(data['items']) >= 1:
                     vidlink = data['items'][0]['id']['videoId']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           'https://www.youtube.com/watch?v=' + vidlink + '&type=video')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t do that.\n(Video not found)')
 # --------------------------------------------------Weather : Yahoo API-------------------------------------------------
             elif wType:  #
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 yahoourl = \
                     "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20" \
                     "in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%27" + requestText.encode(
@@ -277,12 +276,14 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     astronomy['sunset']))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I don\'t know the place ' +
                                                           requestText.encode('utf-8') + '.')
 # ----------------------------------------------Porn Search : GCSE API--------------------------------------------------
             elif xType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 googurl = 'https://www.googleapis.com/customsearch/v1?&num=10&safe=off&cx=' + keyConfig.get\
                     ('Google', 'GCSE_XSE_ID') + '&key=' + keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
@@ -310,6 +311,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
 # -------------------------------------------Dictionary : DictionaryAPI.net---------------------------------------------
             elif dicType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 dicUrl = 'http://dictionaryapi.net/api/definition/'
                 realUrl = dicUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
@@ -318,17 +320,20 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     if len(partOfSpeech['Definitions']) >= 1:
                         definitionText = partOfSpeech['Definitions'][0]
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                               requestText.title() + ":\n" + partOfSpeech[
                                                               'PartOfSpeech'] + ".\n\n" + definitionText)
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id,
                                         text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t find any definitions for the word ' +
                                              requestText + '.')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any definitions for the word ' +
@@ -336,18 +341,21 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
 # -----------------------------------------------Urban Dictionary : Urban API-------------------------------------------
             elif urbanDicType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 dicurl = 'http://api.urbandictionary.com/v0/define?term='
                 realUrl = dicurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['list']) >= 1:
                     resultNum = data['list'][random.randint(0, len(data['list']) - 1)]
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text=(user + ': ' if not user == '' else '') +
                                          'Urban Definition For ' + requestText.title() + ":\n" + resultNum['definition'] +
                                          '\n\nExample:\n' + resultNum['example'])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any urban definitions for ' +
@@ -355,6 +363,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
 # ---------------------------------------------Google Maps Places API---------------------------------------------------
             elif placeType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.FIND_LOCATION)
+                userWithCurrentChatAction = chat_id
                 mapsUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?key=' + \
                           keyConfig.get('Google', 'GCSE_APP_ID') + '&location=-30,30&radius=50000&query='
                 realUrl = mapsUrl + requestText.encode('utf-8')
@@ -365,6 +374,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any places for ' +
@@ -384,11 +394,13 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     detectedLanguageSemanticName = [lang for lang in languagesList
                                                     if lang['language'] == detectedLanguage][0]['name']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           "Detected language: " + detectedLanguageSemanticName +
                                                           "\nMeaning: " + translation.title())
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any translations for ' +
                                          requestText.encode('utf-8') + '.')
@@ -421,12 +433,14 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     leechs = str(data['1']['leechs'])
                     downloadUrl = torrageUrl + torrent.upper()
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text=(user + ': ' if not user == '' else '') +
                                          'Torrent Name: ' + tTitle + '\nDownload Link: ' + downloadUrl + '\nSeeds: ' +
                                          seeds + '\nLeechers: ' + leechs, disable_web_page_preview=True)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I can\'t find any torrents for ' +
                                                           requestText.encode('utf-8') + '.')
@@ -438,8 +452,9 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data[2]) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
-                                                          'Description: ' + data[2][0] + '\nLink: ' + data[3][0],
+                                                          data[2][0] + '\nLink: ' + data[3][0],
                                     disable_web_page_preview=True)
                 else:
                     wikiUrl = \
@@ -448,11 +463,13 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     data = json.load(urllib.urlopen(realUrl))
                     if len(data[2]) >= 1 and not data[2][0] == '':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
-                                                              'Description: ' + data[2][0] + '\nLink: ' + data[3][0],
+                                                              data[2][0] + '\nLink: ' + data[3][0],
                                         disable_web_page_preview=True)
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id,
                                         text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t find any wiki articles for ' +
@@ -460,24 +477,26 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
 # --------------------------------------------Get a quote from WikiQuote------------------------------------------------
             elif quoteType:
                 wikiUrl = \
-                    'https://en.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
+                    'https://simple.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
                 realUrl = wikiUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if len(data['query']['search']) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                    bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
-                                                           MLStripper.strip_tags(data['query']['search'][0]['snippet']
-                                                                                 .replace('<span class="searchmatch">', '*')
-                                                                                 .replace('</span>', '*')) +
-                                                          '\nhttps://en.wikiquote.org/wiki/' + urllib.quote(data['query']['search'][0]['title'].encode('utf-8')),
+                    userWithCurrentChatAction = chat_id
+                    messageText = (user + ': ' if not user == '' else '') + MLStripper.strip_tags(
+                        data['query']['search'][0]['snippet'].replace('<span class="searchmatch">', '*').replace(
+                            '</span>', '*')) + '\nhttps://simple.wikiquote.org/wiki/' + urllib.quote(
+                        data['query']['search'][0]['title'].encode('utf-8'))
+                    bot.sendMessage(chat_id=chat_id, text=messageText,
                                     disable_web_page_preview=True, parse_mode='Markdown')
                 else:
                     wikiUrl = \
-                        'https://simple.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
+                        'https://en.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
                     realUrl = wikiUrl + requestText.encode('utf-8')
                     data = json.load(urllib.urlopen(realUrl))
                     if len(data['query']['search']) >= 1:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                                MLStripper.strip_tags(data['query']['search'][0]['snippet']
                                                                                      .replace('<span class="searchmatch">', '*')
@@ -486,6 +505,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                         disable_web_page_preview=True, parse_mode='Markdown')
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id,
                                         text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t find any quotes for ' +
@@ -507,6 +527,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                         durationSeconds = data['response'][0]['duration']
                         startDateTime = datetime.datetime.fromtimestamp(timeStamp)
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                               'The next ISS sighting in ' + requestText.encode(
                             'utf-8').title() + ' starts at ' + startDateTime.strftime(
@@ -515,12 +536,14 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                             divmod(durationSeconds, 60)[1]) + ' seconds.')
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id,
                                         text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t find the next ISS sighting for ' +
                                              requestText.encode('utf-8') + '.')
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any places for ' +
@@ -531,10 +554,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 track = client.get('/tracks', q=requestText.encode('utf-8'), sharing='public')
                 if len(track) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           track[0].permalink_url)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find the sound of ' +
@@ -542,12 +567,14 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
 # ----------------------------------------------------ISS Position------------------------------------------------------
             elif issposType:
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                 userWithCurrentChatAction = chat_id
                  bot.sendPhoto(chat_id=chat_id,
                        photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544',
                        caption=(user + ': ' if not user == '' else '') + 'Current Position of the ISS')
 # ----------------------------------------Currency Converter : fixer.io API---------------------------------------------
             elif currencyType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 usdurl = 'http://api.fixer.io/latest?base=USD'
                 gbpurl = 'http://api.fixer.io/latest?base=GBP'
                 eururl = 'http://api.fixer.io/latest?base=EUR'
@@ -571,13 +598,16 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     googleBooksUrl = data['items'][0]['accessInfo']['webReaderLink']
                     if 'imageLinks' in bookData:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        userWithCurrentChatAction = chat_id
                         bot.sendPhoto(chat_id=chat_id, photo=bookData['imageLinks']['thumbnail'],
                                       caption=(user + ': ' if not user == '' else '') + googleBooksUrl)
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') + googleBooksUrl)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any books for ' +
                                                           requestText.encode('utf-8') + '.')
@@ -596,6 +626,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                                                                            imagelink.encode('utf-8')))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any figs.')
 # ----------------------------------------------ISIS news RSS feed------------------------------------------------------
@@ -604,10 +635,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 data = feedparser.parse(realUrl)
                 if len(data.entries) >= 1:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           data.entries[random.randint(0, 9)].link)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any ISIS news.')
 # ---------------------------------------------Movie from  OMDB API-----------------------------------------------------
@@ -618,14 +651,17 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 if 'Error' not in data:
                     if 'Poster' in data and not data['Poster'] == 'N/A':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        userWithCurrentChatAction = chat_id
                         bot.sendPhoto(chat_id=chat_id, photo=data['Poster'],
                                       caption=(user if not user == '' else '') + data['Title'] + ':\n' + data['Plot'])
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
                         bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                               data['Title'] + ':\n' + data['Plot'])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any movies for ' +
@@ -650,10 +686,12 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                             if not answer == None:
                                 fullAnswer += answer.encode('ascii', 'ignore')
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           fullAnswer)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any answers for ' +
@@ -692,6 +730,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                         if update.message.chat.type == 'group' and not adminOverride and isMoveValid:
                             if update.message.chat.id in lastUserWhoMoved and lastUserWhoMoved[update.message.chat.id] == user:
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                                userWithCurrentChatAction = chat_id
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t let you make more than one sequential chess move in a group.')
                                 userRestricted = True
@@ -704,6 +743,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                 boardImageUrl = str(boardResponse.split(' ', 1)[1])
                                 boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                                userWithCurrentChatAction = chat_id
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
                                                             caption='Top Left: A1. Bottom Right: H8')
@@ -729,11 +769,13 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                     .replace('o', 'b')\
                                     .replace('p', 'a')
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                                userWithCurrentChatAction = chat_id
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                                       ', I\'m afraid that chess move is invalid. List of valid moves:\n' +
                                                                       formatedmovesList[len('validmoves'):])
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry whoever you are, I\'m afraid' +
                                                           ' you must have a username to be trusted' +
                                                           'enough to make chess moves.')
@@ -744,17 +786,14 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                 boardImageUrl = str(boardResponse.split(' ', 1)[1])
                 boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                userWithCurrentChatAction = chat_id
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
                               caption='Top Left: A1. Bottom Right: H8')
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
-
-    if not update_id == None and len(allUpdates) >= 1:
-        urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
-                       '/getUpdates?offset=' + str(update_id))
-    return update_id
+    return
 
 
 if __name__ == '__main__':
