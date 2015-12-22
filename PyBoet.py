@@ -133,6 +133,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
             answerType = splitText[0].lower() == '/getanswer' if ' ' in message else False  # An answer from Wolfram Alpha API
             imgurType = splitText[0].lower() == '/imgur' if ' ' in message else False # Imgur API
             chessType = splitText[0].lower() == '/chessmove' if ' ' in message else False # Riot's chess API
+            quoteType = splitText[0].lower() == '/getquote' if ' ' in message else False # Wikiquote API
 
             figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
             isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -447,12 +448,47 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     data = json.load(urllib.urlopen(realUrl))
                     if len(data[2]) >= 1 and not data[2][0] == '':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                        bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') + data[2][0])
+                        bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
+                                                              'Description: ' + data[2][0] + '\nLink: ' + data[3][0],
+                                        disable_web_page_preview=True)
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         bot.sendMessage(chat_id=chat_id,
                                         text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                              ', I\'m afraid I can\'t find any wiki articles for ' +
+                                             requestText.encode('utf-8') + '.')
+# --------------------------------------------Get a quote from WikiQuote------------------------------------------------
+            elif quoteType:
+                wikiUrl = \
+                    'https://en.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
+                realUrl = wikiUrl + requestText.encode('utf-8')
+                data = json.load(urllib.urlopen(realUrl))
+                if len(data['query']['search']) >= 1:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
+                                                           MLStripper.strip_tags(data['query']['search'][0]['snippet']
+                                                                                 .replace('<span class="searchmatch">', '*')
+                                                                                 .replace('</span>', '*')) +
+                                                          '\nhttps://en.wikiquote.org/wiki/' + urllib.quote(data['query']['search'][0]['title'].encode('utf-8')),
+                                    disable_web_page_preview=True, parse_mode='Markdown')
+                else:
+                    wikiUrl = \
+                        'https://simple.wikiquote.org/w/api.php?action=query&list=search&srlimit=1&namespace=0&format=json&srsearch='
+                    realUrl = wikiUrl + requestText.encode('utf-8')
+                    data = json.load(urllib.urlopen(realUrl))
+                    if len(data['query']['search']) >= 1:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
+                                                               MLStripper.strip_tags(data['query']['search'][0]['snippet']
+                                                                                     .replace('<span class="searchmatch">', '*')
+                                                                                     .replace('</span>', '*')) +
+                                                              '\nhttps://en.wikiquote.org/wiki/' + urllib.quote(data['query']['search'][0]['title'].encode('utf-8')),
+                                        disable_web_page_preview=True, parse_mode='Markdown')
+                    else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        bot.sendMessage(chat_id=chat_id,
+                                        text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                             ', I\'m afraid I can\'t find any quotes for ' +
                                              requestText.encode('utf-8') + '.')
 # -----------------------------------# ISS Spotting : Open Notify + Google Maps API-------------------------------------
             elif issType:
@@ -612,7 +648,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                     for pod in result.pods:
                         for answer in pod.format['plaintext']:
                             if not answer == None:
-                                fullAnswer += answer.encode('utf-8')
+                                fullAnswer += answer.encode('ascii', 'ignore')
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
                                                           fullAnswer)
@@ -622,7 +658,7 @@ def echo(bot, update_id, keyConfig, lastUserWhoMoved):
                                     text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                          ', I\'m afraid I can\'t find any answers for ' +
                                          requestText.encode('utf-8'))
-# ----------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------Play Chess Against HeyBoet--------------------------------------------
             elif chessType:
                 if not user == '':
                     adminOverride = False
