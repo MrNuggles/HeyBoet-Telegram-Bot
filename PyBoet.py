@@ -91,9 +91,10 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         if message:
             splitText = message.split(' ', 1)
 
-            bcType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
-            issposType = message.lower() == '/iss'  # ISS Position Command
+            bitcoinType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
+            issPosType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
+            rocketType = message.lower() == '/launch'  # Rocket Launch Command
 
             chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
@@ -406,7 +407,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                           ', I\'m afraid I can\'t find any translations for ' +
                                          requestText.encode('utf-8') + '.')
 # -----------------------------------------Current Bitcoin Price - CoinDesk API-----------------------------------------
-            elif bcType:
+            elif bitcoinType:
                 bcurl = 'https://api.coindesk.com/v1/bpi/currentprice/ZAR.json'
                 data = json.load(urllib.urlopen(bcurl))
                 bcurl2 = 'https://api.coindesk.com/v1/bpi/currentprice.json'
@@ -570,7 +571,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                          ', I\'m afraid I can\'t find the sound of ' +
                                          requestText.encode('utf-8') + '.')
 # ----------------------------------------------------ISS Position------------------------------------------------------
-            elif issposType:
+            elif issPosType:
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  userWithCurrentChatAction = chat_id
                  bot.sendPhoto(chat_id=chat_id,
@@ -795,6 +796,32 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
                               caption='Top Left: A1. Bottom Right: H8')
+# --------------------------------------------------Next Rocket Launch--------------------------------------------------
+            elif rocketType:
+                rocketUrl = urllib2.Request('https://launchlibrary.net/1.1/launch/next/5', headers={'User-Agent' : "Magic Browser"})
+                rocketData = json.load(urllib2.urlopen(rocketUrl))
+                blast = rocketData['launches']
+                b1 = blast[0]
+                b2 = blast[1]
+                b3 = blast[2]
+                b4 = blast[3]
+                b5 = blast[4]
+
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                bot.sendMessage(chat_id=chat_id, text='Upcoming Launches:\n\n' + b1['net'] + '\n*' + b1['name'] +
+                                                      '*\nLaunching from [' + b1['location']['pads'][0]['name'] + ']('
+                                                      + b1['location']['pads'][0]['mapURL'] + ')\n\n' + b2['net'] +
+                                                      '\n*' + b2['name'] + '*\nLaunching from [' +
+                                                      b2['location']['pads'][0]['name'] + '](' + '*\nLaunching from  ['
+                                                      + b3['location']['pads'][0]['name'] + '](' +
+                                                      b3['location']['pads'][0]['mapURL'] + ')\n\n' + b4['net'] +
+                                                      '\n*' + b4['name'] + '*\nLaunching from  [' +
+                                                      b4['location']['pads'][0]['name'] + '](' +
+                                                      b4['location']['pads'][0]['mapURL'] + ')\n\n' + b5['net'] +
+                                                      '\n*' + b5['name'] + '*\nLaunching from  [' +
+                                                      b5['location']['pads'][0]['name'] + '](' +
+                                                      b5['location']['pads'][0]['mapURL'] + ')',
+                                parse_mode=telegram.ParseMode.MARKDOWN)
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 return
