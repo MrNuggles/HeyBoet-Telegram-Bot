@@ -60,11 +60,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     # Request updates after the last update_id
     allUpdates = bot.getUpdates()
 
-    # Reset updates after the last update_id
+    # Reset all updates until after the last update_id
     if len(allUpdates) >= 1:
         lastUpdateId = allUpdates[-1].update_id + 1
         data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                         '/getUpdates?offset=' + str(lastUpdateId)))
+    else:
+        sleep(5000)
 
     # If reset
     for update in allUpdates:
@@ -711,23 +713,23 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                         requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
                     moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
                     formatedRequestText = requestText.lower()\
-                        .replace('a', 'i')\
-                        .replace('b', 'j')\
-                        .replace('c', 'k')\
-                        .replace('d', 'l')\
-                        .replace('e', 'm')\
-                        .replace('f', 'n')\
-                        .replace('g', 'o')\
-                        .replace('h', 'p')
+                        .replace('1', 'i')\
+                        .replace('2', 'j')\
+                        .replace('3', 'k')\
+                        .replace('4', 'l')\
+                        .replace('5', 'm')\
+                        .replace('6', 'n')\
+                        .replace('7', 'o')\
+                        .replace('8', 'p')
                     formatedRequestText = formatedRequestText\
-                        .replace('i', 'h')\
-                        .replace('j', 'g')\
-                        .replace('k', 'f')\
-                        .replace('l', 'e')\
-                        .replace('m', 'd')\
-                        .replace('n', 'c')\
-                        .replace('o', 'b')\
-                        .replace('p', 'a')
+                        .replace('i', '8')\
+                        .replace('j', '7')\
+                        .replace('k', '6')\
+                        .replace('l', '5')\
+                        .replace('m', '4')\
+                        .replace('n', '3')\
+                        .replace('o', '2')\
+                        .replace('p', '1')
                     realUrl = moveUrl + formatedRequestText.encode('utf-8')
                     moveResponse = (urllib.urlopen(realUrl)).read()
                     isMoveValid = not moveResponse.startswith('invalid')
@@ -752,28 +754,28 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                 userWithCurrentChatAction = chat_id
                                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                                            caption='Top Left: A1. Bottom Right: H8')
+                                                            caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
                                 formatedmovesList = movesList\
-                                    .replace('a', 'i')\
-                                    .replace('b', 'j')\
-                                    .replace('c', 'k')\
-                                    .replace('d', 'l')\
-                                    .replace('e', 'm')\
-                                    .replace('f', 'n')\
-                                    .replace('g', 'o')\
-                                    .replace('h', 'p')
+                                    .replace('1', 'i')\
+                                    .replace('2', 'j')\
+                                    .replace('3', 'k')\
+                                    .replace('4', 'l')\
+                                    .replace('5', 'm')\
+                                    .replace('6', 'n')\
+                                    .replace('7', 'o')\
+                                    .replace('8', 'p')
                                 formatedmovesList = formatedmovesList\
-                                    .replace('i', 'h')\
-                                    .replace('j', 'g')\
-                                    .replace('k', 'f')\
-                                    .replace('l', 'e')\
-                                    .replace('m', 'd')\
-                                    .replace('n', 'c')\
-                                    .replace('o', 'b')\
-                                    .replace('p', 'a')
+                                    .replace('i', '8')\
+                                    .replace('j', '7')\
+                                    .replace('k', '6')\
+                                    .replace('l', '5')\
+                                    .replace('m', '4')\
+                                    .replace('n', '3')\
+                                    .replace('o', '2')\
+                                    .replace('p', '1')
                                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                 userWithCurrentChatAction = chat_id
                                 bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
@@ -784,7 +786,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry whoever you are, I\'m afraid' +
                                                           ' you must have a username to be trusted' +
-                                                          'enough to make chess moves.')
+                                                          ' enough to make chess moves.')
 # ---------------------------------View the current state of the chess game---------------------------------------------
             elif chessBoardType:
                 boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
@@ -795,7 +797,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 userWithCurrentChatAction = chat_id
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                              caption='Top Left: A1. Bottom Right: H8')
+                              caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
             elif rocketType:
                 rocketUrl = urllib2.Request('https://launchlibrary.net/1.1/launch/next/5', headers={'User-Agent' : "Magic Browser"})
