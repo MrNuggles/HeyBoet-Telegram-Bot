@@ -66,7 +66,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                         '/getUpdates?offset=' + str(lastUpdateId)))
     else:
-        sleep(5000)
+        sleep(5)
 
     # If reset
     for update in allUpdates:
