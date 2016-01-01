@@ -97,6 +97,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             issPosType = message.lower() == '/iss'  # ISS Position Command
             currencyType = message.lower() == '/rand'  # Currency Command
             rocketType = message.lower() == '/launch'  # Rocket Launch Command
+            spacexType = message.lower() == '/spacex'  # SpaceX Launch Schedule Command
 
             chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
@@ -135,7 +136,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                                                                   'GCSE_APP_ID') + '&q='
                 realUrl = googurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if 'items' in data and len(data['items']) >= 1:
+                if 'items' in data and len(data['items']) >= 9:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     userWithCurrentChatAction = chat_id
@@ -271,13 +272,12 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     forecast = data['query']['results']['channel']['item']['forecast']
                     city = data['query']['results']['channel']['location']['city']
                     astronomy = data['query']['results']['channel']['astronomy']
-                    bot.sendMessage(chat_id=chat_id, text=((user + ': ' if not user == '' else '') +
-                                                           'It is currently ' + weather['text'] + ' in ' + city +
-                                                           ' with a temperature of '
-                    + weather['temp'] + 'C.\nA high of ' + forecast[0]['high'] + ' and a low of ' +
-                    forecast[0]['low'] + ' are expected during the day with conditions being ' +
-                    forecast[0]['text'] + '.\nSunrise: ' + astronomy['sunrise'] + '\nSunset: ' +
-                    astronomy['sunset']))
+                    bot.sendMessage(chat_id=chat_id, text=('It is currently ' + weather['text'] + ' in ' + city +
+                                                           ' with a temperature of ' + weather['temp'] + 'C.\nA high of ' +
+                                                           forecast[0]['high'] + ' and a low of ' + forecast[0]['low'] +
+                                                           ' are expected during the day with conditions being ' +
+                                                           forecast[0]['text'] + '.\nSunrise: ' + astronomy['sunrise'] +
+                                                           '\nSunset: ' + astronomy['sunset']), parse_mode=telegram.ParseMode.MARKDOWN)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
@@ -420,8 +420,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 priceGB = data2['bpi']['GBP']
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 bot.sendMessage(chat_id=chat_id,
-                                text=(user + ': ' if not user == '' else '') +
-                                     'The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] +
+                                text='The Current Price of 1 Bitcoin:\n\n' + priceUS['rate'] +
                                      ' USD\n' + priceGB['rate'] +
                                      ' GBP\n' + priceZA['rate'] + ' ZAR' + '\n\nTime Updated: ' + updateTime)
 # --------------------------------Torrent Search + Fetch : Strike + TorrentProject API----------------------------------
@@ -439,8 +438,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id,
-                                    text=(user + ': ' if not user == '' else '') +
-                                         'Torrent Name: ' + tTitle + '\nDownload Link: ' + downloadUrl + '\nSeeds: ' +
+                                    text='Torrent Name: ' + tTitle + '\nDownload Link: ' + downloadUrl + '\nSeeds: ' +
                                          seeds + '\nLeechers: ' + leechs, disable_web_page_preview=True)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -577,8 +575,8 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                  bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                  userWithCurrentChatAction = chat_id
                  bot.sendPhoto(chat_id=chat_id,
-                       photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544',
-                       caption=(user + ': ' if not user == '' else '') + 'Current Position of the ISS')
+                               photo='http://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=400&height=400&satid=25544',
+                               caption='Current Position of the ISS')
 # ----------------------------------------Currency Converter : fixer.io API---------------------------------------------
             elif currencyType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -592,8 +590,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 zarusd = float(data1['rates']['ZAR'])
                 zargbp = float(data2['rates']['ZAR'])
                 zareur = float(data3['rates']['ZAR'])
-                bot.sendMessage(chat_id=chat_id, text=(user + ': ' if not user == '' else '') +
-                                                      '1 USD = ' + str(zarusd) + ' ZAR\n1 GBP = ' + str(zargbp) +
+                bot.sendMessage(chat_id=chat_id, text='1 USD = ' + str(zarusd) + ' ZAR\n1 GBP = ' + str(zargbp) +
                                                       ' ZAR\n1 EUR = ' + str(zareur) + ' ZAR')
 # ---------------------------------------------------Google Books API---------------------------------------------------
             elif bookType:
@@ -808,8 +805,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 b3 = blast[2]
                 b4 = blast[3]
                 b5 = blast[4]
-
+            #    missionId = b1['missions']['id']
+            #    missionUrlRaw = 'https://launchlibrary.net/1.1/mission/' + missionId
+            #    missionUrl = urllib2.Request(missionUrlRaw, headers={'User-Agent' : "Magic Browser"})
+            #    missionData = json.load(urllib2.urlopen(missionUrl))
+            #    missionDesc = missionData['missions']['description']
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
                 bot.sendMessage(chat_id=chat_id, text='Upcoming Rocket Launches:\n\n' +
                                                       b1['net'] + '\n*' + b1['name'] + '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')\n\n' +
                                                       b2['net'] + '\n*' + b2['name'] + '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')\n\n' +
