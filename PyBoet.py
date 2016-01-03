@@ -43,7 +43,10 @@ def main():
     while True:
         try:
             getUpdatesLoop(bot, KeyConfig, lastUserWhoMoved)
-        except telegram.TelegramError or socket.timeout as e:
+        except telegram.TelegramError or \
+                socket.timeout or \
+                URLError or \
+                httplib.BadStatusLine as e:
             bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I\'m afraid I experienced an error!' )
             if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=e.message)
@@ -62,7 +65,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         print e.message
 
     # Reset all updates until after the last update_id
-    if len(allUpdates) >= 1:
+    if allUpdates and len(allUpdates) >= 1:
         lastUpdateId = allUpdates[-1].update_id + 1
         data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                         '/getUpdates?offset=' + str(lastUpdateId)))
