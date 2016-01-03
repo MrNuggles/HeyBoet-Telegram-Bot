@@ -852,7 +852,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 userWithCurrentChatAction = chat_id
                 bot.sendMessage(chat_id=chat_id, text='The server at {0} has {1} players and replied in {2} ms' +
-                                                      ('' if dynmapPort == '' else '\nSee map: ' + mcServer + dynmapPort)
+                                                      ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort)
                                 .format(mcServer + ':' + str(mcPort), status.players.online, status.latency))
 # ----------------------------------------------------------------------------------------------------------------------
             else:
