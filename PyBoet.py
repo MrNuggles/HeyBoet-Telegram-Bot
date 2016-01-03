@@ -1,6 +1,8 @@
 # coding=utf-8
 import httplib
 import logging
+import socket
+
 import telegram
 import json
 import urllib
@@ -41,7 +43,7 @@ def main():
     while True:
         try:
             getUpdatesLoop(bot, KeyConfig, lastUserWhoMoved)
-        except telegram.TelegramError as e:
+        except telegram.TelegramError or socket.timeout as e:
             bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I\'m afraid I experienced an error!' )
             if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=e.message)
@@ -846,13 +848,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
             elif mcType:
                 mcServer = keyConfig.get('Minecraft', 'SVR_ADDR')
-                mcPort = keyConfig.get('Minecraft', 'SVR_PORT')
+                mcPort = int(keyConfig.get('Minecraft', 'SVR_PORT'))
                 dynmapPort = keyConfig.get('Minecraft', 'DYNMAP_PORT')
                 status = MinecraftServer(mcServer, mcPort).status()
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 userWithCurrentChatAction = chat_id
-                bot.sendMessage(chat_id=chat_id, text='The server at {0} has {1} players and replied in {2} ms' +
-                                                      ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort)
+                bot.sendMessage(chat_id=chat_id, text=('The server at {0} has {1} players and replied in {2} ms' +
+                                                      ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort))
                                 .format(mcServer + ':' + str(mcPort), status.players.online, status.latency))
 # ----------------------------------------------------------------------------------------------------------------------
             else:
