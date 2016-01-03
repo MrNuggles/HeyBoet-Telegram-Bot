@@ -13,6 +13,7 @@ import soundcloud
 import feedparser
 import tungsten
 import requests
+from mcstatus import MinecraftServer
 
 from imgurpython import ImgurClient
 from time import sleep
@@ -45,11 +46,6 @@ def main():
             if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=e.message)
             continue
-        except URLError as e:
-            # These are network problems on our end.
-            raise e
-        except httplib.BadStatusLine as e:
-            raise e
 
 
 def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
@@ -57,8 +53,11 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     # Force all chat actions to resolve even on error.
     global userWithCurrentChatAction
 
-    # Request updates after the last update_id
-    allUpdates = bot.getUpdates()
+    try:
+        # Request updates after the last update_id
+        allUpdates = bot.getUpdates()
+    except httplib.BadStatusLine or urllib2.URLError as e:
+        print e.message
 
     # Reset all updates until after the last update_id
     if len(allUpdates) >= 1:
@@ -98,6 +97,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             currencyType = message.lower() == '/rand'  # Currency Command
             rocketType = message.lower() == '/launch'  # Rocket Launch Command
             spacexType = message.lower() == '/spacex'  # SpaceX Launch Schedule Command
+            mcType = message.lower() == '/mc'  # Minecraft server status
 
             chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
@@ -743,15 +743,24 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                 lastUserWhoMoved[update.message.chat.id] = user
                         if not userRestricted or adminOverride:
                             if isMoveValid:
-                                boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
-                                boardResponse = (urllib.urlopen(boardUrl)).read()
-                                boardImageUrl = str(boardResponse.split(' ', 1)[1])
-                                boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
-                                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                                userWithCurrentChatAction = chat_id
-                                bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
-                                                                     urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                                                            caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
+                                movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                                movesList = (urllib.urlopen(movesUrl)).read()[len('validmoves'):]
+                                if not movesList == '':
+                                    boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                                    boardResponse = (urllib.urlopen(boardUrl)).read()
+                                    boardImageUrl = str(boardResponse.split(' ', 1)[1])
+                                    boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
+                                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                                    userWithCurrentChatAction = chat_id
+                                    bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
+                                                                         urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
+                                                                caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
+                                else:
+                                    urllib.urlopen('http://riot.so/cgi-bin/chess?move=reset')
+                                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                                    userWithCurrentChatAction = chat_id
+                                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                                          ', I\'m afraid the chess game is over.')
                             else:
                                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
@@ -786,6 +795,26 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                           ' enough to make chess moves.')
 # ---------------------------------View the current state of the chess game---------------------------------------------
             elif chessBoardType:
+                movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                movesList = (urllib.urlopen(movesUrl)).read()
+                formatedmovesList = movesList\
+                    .replace('1', 'i')\
+                    .replace('2', 'j')\
+                    .replace('3', 'k')\
+                    .replace('4', 'l')\
+                    .replace('5', 'm')\
+                    .replace('6', 'n')\
+                    .replace('7', 'o')\
+                    .replace('8', 'p')
+                formatedmovesList = formatedmovesList\
+                    .replace('i', '8')\
+                    .replace('j', '7')\
+                    .replace('k', '6')\
+                    .replace('l', '5')\
+                    .replace('m', '4')\
+                    .replace('n', '3')\
+                    .replace('o', '2')\
+                    .replace('p', '1')
                 boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
                 boardResponse = (urllib.urlopen(boardUrl)).read()
                 boardImageUrl = str(boardResponse.split(' ', 1)[1])
@@ -794,7 +823,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 userWithCurrentChatAction = chat_id
                 bot.sendPhoto(chat_id=chat_id, photo=boardUrlImageBase +
                                                      urllib.quote(boardImageUrl[len(boardUrlImageBase):]),
-                              caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
+                              caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8\nValid moves: ' + formatedmovesList[len('validmoves'):])
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
             elif rocketType:
                 rocketUrl = urllib2.Request('https://launchlibrary.net/1.1/launch/next/5', headers={'User-Agent' : "Magic Browser"})
@@ -805,11 +834,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 b3 = blast[2]
                 b4 = blast[3]
                 b5 = blast[4]
-            #    missionId = b1['missions']['id']
-            #    missionUrlRaw = 'https://launchlibrary.net/1.1/mission/' + missionId
-            #    missionUrl = urllib2.Request(missionUrlRaw, headers={'User-Agent' : "Magic Browser"})
-            #    missionData = json.load(urllib2.urlopen(missionUrl))
-            #    missionDesc = missionData['missions']['description']
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 userWithCurrentChatAction = chat_id
                 bot.sendMessage(chat_id=chat_id, text='Upcoming Rocket Launches:\n\n' +
@@ -819,6 +843,17 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                       b4['net'] + '\n*' + b4['name'] + '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')\n\n' +
                                                       b5['net'] + '\n*' + b5['name'] + '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')',
                                                      parse_mode=telegram.ParseMode.MARKDOWN)
+# --------------------------------------------------Next Rocket Launch--------------------------------------------------
+            elif mcType:
+                mcServer = keyConfig.get('Minecraft', 'SVR_ADDR')
+                mcPort = keyConfig.get('Minecraft', 'SVR_PORT')
+                dynmapPort = keyConfig.get('Minecraft', 'DYNMAP_PORT')
+                status = MinecraftServer(mcServer, mcPort).status()
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
+                bot.sendMessage(chat_id=chat_id, text='The server at {0} has {1} players and replied in {2} ms' +
+                                                      ('' if dynmapPort == '' else '\nSee map: ' + mcServer + dynmapPort)
+                                .format(mcServer + ':' + str(mcPort), status.players.online, status.latency))
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 return
