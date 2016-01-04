@@ -20,7 +20,6 @@ WOLF_APP_ID: {Your Wolfram developer API key here}
 CLIENT_ID: {Imgur Client ID goes here}
 CLIENT_SECRET: {Imgur Client Secret goes here}
 
-
 [Minecraft]
 SVR_ADDR: {Your Minecraft Server Address here}
 SVR_PORT: {Your Minecraft Server Port here}

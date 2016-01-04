@@ -45,7 +45,7 @@ def main():
             getUpdatesLoop(bot, KeyConfig, lastUserWhoMoved)
         except telegram.TelegramError or \
                 socket.timeout or \
-                URLError or \
+                urllib2.URLError or \
                 httplib.BadStatusLine as e:
             bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I\'m afraid I experienced an error!' )
             if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
@@ -58,6 +58,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     # Force all chat actions to resolve even on error.
     global userWithCurrentChatAction
 
+    allUpdates = {}
     try:
         # Request updates after the last update_id
         allUpdates = bot.getUpdates()
@@ -65,7 +66,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         print e.message
 
     # Reset all updates until after the last update_id
-    if allUpdates and len(allUpdates) >= 1:
+    if not allUpdates == {} and len(allUpdates) >= 1:
         lastUpdateId = allUpdates[-1].update_id + 1
         data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                         '/getUpdates?offset=' + str(lastUpdateId)))
