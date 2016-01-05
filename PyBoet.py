@@ -44,12 +44,12 @@ def main():
         try:
             getUpdatesLoop(bot, KeyConfig, lastUserWhoMoved)
         except telegram.TelegramError or \
-                socket.timeout or \
+                socket.timeout or socket.error or \
                 urllib2.URLError or \
                 httplib.BadStatusLine as e:
-            bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I\'m afraid I experienced an error!' )
+            bot.sendMessage(chat_id=userWithCurrentChatAction, text='I\'m sorry Dave, I suffered an error!')
             if not KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
-                bot.sendMessage(chat_id=userWithCurrentChatAction, text=e.message)
+                bot.sendMessage(chat_id=KeyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID'), text=e.message)
             continue
 
 
@@ -59,11 +59,8 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     global userWithCurrentChatAction
 
     allUpdates = {}
-    try:
-        # Request updates after the last update_id
-        allUpdates = bot.getUpdates()
-    except httplib.BadStatusLine or urllib2.URLError as e:
-        print e.message
+    # Request updates after the last update_id
+    allUpdates = bot.getUpdates()
 
     # Reset all updates until after the last update_id
     if not allUpdates == {} and len(allUpdates) >= 1:
@@ -104,6 +101,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             rocketType = message.lower() == '/launch'  # Rocket Launch Command
             spacexType = message.lower() == '/spacex'  # SpaceX Launch Schedule Command
             mcType = message.lower() == '/mc'  # Minecraft server status
+            cricType = message.lower() == '/cric'  # Proteas status from Cricbuzz api
 
             chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
@@ -147,8 +145,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     userWithCurrentChatAction = chat_id
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'), caption=(user + ': ' if not user == '' else '') +
-                                                                                            requestText.title()
-                                  .encode('utf-8'))
+                                                                                            requestText.title())
                 else:
                     bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
                                                           ', I\'m afraid I can\'t find any images for ' +
@@ -860,6 +857,25 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 bot.sendMessage(chat_id=chat_id, text=('The server at {0} has {1} players and replied in {2} ms' +
                                                       ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort))
                                 .format(mcServer + ':' + str(mcPort), status.players.online, status.latency))
+# --------------------------------------------------Next Rocket Launch--------------------------------------------------
+            elif cricType:
+                allMatchesUrl = 'http://cricscore-api.appspot.com/csa'
+                allMatches = json.load(urllib.urlopen(allMatchesUrl))
+                proteasMatchId = None
+                for match in allMatches:
+                    if match['t1'] == 'South Africa' or match['t2'] == 'South Africa':
+                        proteasMatchId = match['id']
+                if proteasMatchId == None:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                                          ', I\'m afraid the Proteas are not playing right now.')
+                else:
+                    matchesUrl = 'http://cricscore-api.appspot.com/csa?id=' + str(proteasMatchId)
+                    match = json.load(urllib.urlopen(matchesUrl))
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
+                    bot.sendMessage(chat_id=chat_id, text=(match[0]['si'] + '\n' + match[0]['de']))
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 return
