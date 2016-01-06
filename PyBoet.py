@@ -58,7 +58,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     # Force all chat actions to resolve even on error.
     global userWithCurrentChatAction
 
-    allUpdates = {}
     # Request updates after the last update_id
     allUpdates = bot.getUpdates()
 
@@ -128,6 +127,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             imgurType = splitText[0].lower() == '/imgur' if ' ' in message else False # Imgur API
             chessType = splitText[0].lower() == '/chessmove' if ' ' in message else False # Riot's chess API
             quoteType = splitText[0].lower() == '/getquote' if ' ' in message else False # Wikiquote API
+            showType = splitText[0].lower() == '/getshow' if ' ' in message else False # Search TV Shows with TVMaze API
 
             figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
             isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -628,6 +628,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 if data['searchInformation']['totalResults'] >= 1:
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
                     bot.sendPhoto(chat_id=chat_id, photo=imagelink.encode('utf-8'),
                                   caption=(user if not user == '' else '') +
                                           ('' if len(imagelink.encode('utf-8')) > 100 else ': ' +
@@ -857,7 +858,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 bot.sendMessage(chat_id=chat_id, text=('The server at {0} has {1} players and replied in {2} ms' +
                                                       ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort))
                                 .format(mcServer + ':' + str(mcPort), status.players.online, status.latency))
-# --------------------------------------------------Next Rocket Launch--------------------------------------------------
+# --------------------------------------------------Current Proteas match--------------------------------------------------
             elif cricType:
                 allMatchesUrl = 'http://cricscore-api.appspot.com/csa'
                 allMatches = json.load(urllib.urlopen(allMatchesUrl))
@@ -876,6 +877,22 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
                     bot.sendMessage(chat_id=chat_id, text=(match[0]['si'] + '\n' + match[0]['de']))
+# --------------------------------------------------Search TV Shows with TVMaze API--------------------------------------------------
+            elif showType:
+                showsUrl = 'http://api.tvmaze.com/search/shows?q='
+                data = json.load(urllib.urlopen(showsUrl + requestText))
+                if len(data) >= 1:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    userWithCurrentChatAction = chat_id
+                    bot.sendPhoto(chat_id=chat_id,
+                                  photo=data[0]['show']['image']['original'],
+                                  caption=MLStripper.strip_tags(data[0]['show']['summary'].replace('\\','')[:125]))
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
+                    bot.sendMessage(chat_id=chat_id, text='I\'m sorry ' + (user if not user == '' else 'Dave') +
+                                                                          ', I\'m afraid I cannot find the TV show ' +
+                                                          requestText.title())
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 return
