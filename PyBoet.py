@@ -895,7 +895,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                           requestText.title())
 # ----------------------------------------------------------------------------------------------------------------------
             else:
-                return
+                pass
     return
 
 
