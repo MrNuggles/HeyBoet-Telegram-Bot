@@ -73,8 +73,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         lastUpdateId = allUpdates[-1].update_id + 1
         data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                         '/getUpdates?offset=' + str(lastUpdateId)))
-    else:
-        sleep(1)
 
     # If reset
     for update in allUpdates:
@@ -194,7 +192,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     imagelink = data['items'][random.randint(0, 9)]['link']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     userWithCurrentChatAction = chat_id
-                    urlForCurrentChatAction = requestText
+                    urlForCurrentChatAction = imagelink
                     bot.sendDocument(chat_id=userWithCurrentChatAction,
                                      filename=urlForCurrentChatAction.encode('utf-8'),
                                      document=requestTextForCurrentChatAction.encode('utf-8'))
