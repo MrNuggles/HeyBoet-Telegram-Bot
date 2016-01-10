@@ -194,8 +194,8 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = imagelink
                     bot.sendDocument(chat_id=userWithCurrentChatAction,
-                                     filename=urlForCurrentChatAction.encode('utf-8'),
-                                     document=requestTextForCurrentChatAction.encode('utf-8'))
+                                     filename=requestTextForCurrentChatAction.encode('utf-8'),
+                                     document=urlForCurrentChatAction.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
