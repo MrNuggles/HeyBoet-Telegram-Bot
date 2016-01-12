@@ -401,7 +401,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     lngNum = data['results'][0]['geometry']['location']['lng']
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.FIND_LOCATION)
                     userWithCurrentChatAction = chat_id
-                    urlForCurrentChatAction = 'lat=' + latNum + ' long=' + lngNum
+                    urlForCurrentChatAction = 'lat=' + str(latNum) + ' long=' + str(lngNum)
                     bot.sendLocation(chat_id=chat_id, latitude=latNum, longitude=lngNum)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
