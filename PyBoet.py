@@ -68,12 +68,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     # Request updates after the last update_id
     allUpdates = bot.getUpdates()
 
-    # Reset all updates until after the last update_id
-    if not allUpdates == {} and len(allUpdates) >= 1:
-        lastUpdateId = allUpdates[-1].update_id + 1
-        data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
-                                        '/getUpdates?offset=' + str(lastUpdateId)))
-
     # If reset
     for update in allUpdates:
         if update.message.text == '/reset ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'):
@@ -89,6 +83,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         # chat_id is required to reply to any message
         chat_id = update.message.chat_id
         update_id = update.update_id + 1
+        urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update_id))
         message = update.message.text
         user = update.message.from_user.username \
             if not update.message.from_user.username == '' \
@@ -526,7 +521,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     urlForCurrentChatAction = (user + ': ' if not user == '' else '') + formattedQuoteSnippet + \
                                   '\nhttps://simple.wikiquote.org/wiki/' + \
                                   urllib.quote(data['query']['search'][0]['title'].encode('utf-8'))
-                    bot.sendMessage(chat_id=userWithCurrentChatAction, text=messageText,
+                    bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction,
                                     disable_web_page_preview=True, parse_mode='Markdown')
                 else:
                     wikiUrl = \
