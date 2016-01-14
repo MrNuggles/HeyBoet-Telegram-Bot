@@ -2,6 +2,7 @@
 import httplib
 import logging
 import socket
+import string
 
 import telegram
 import json
@@ -141,7 +142,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
         isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
 
-        requestText = splitText[1] if ' ' in message else ''
+        requestText = filter(lambda x: x in string.printable, splitText[1]) if ' ' in message else ''
         requestTextForCurrentChatAction = requestText
 # ----------------------------------------------Image Search : GCSE API-------------------------------------------------
         if imageType:
