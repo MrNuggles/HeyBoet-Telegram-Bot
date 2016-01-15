@@ -60,6 +60,12 @@ def main():
 
 
 def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
+    # Keep track of the last user to receive a chat action.
+    # Satisfy pending chat actions on error.
+    global userWithCurrentChatAction
+    global urlForCurrentChatAction
+    global requestTextForCurrentChatAction
+
     # Request updates after the last update_id
     allUpdates = bot.getUpdates()
 
@@ -138,12 +144,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
         requestText = filter(lambda x: x in string.printable, splitText[1]) if ' ' in message else ''
         requestTextForCurrentChatAction = requestText
-
-        # Keep track of the last user to receive a chat action.
-        # Satisfy pending chat actions on error.
-        global userWithCurrentChatAction
-        global urlForCurrentChatAction
-        global requestTextForCurrentChatAction
 # ----------------------------------------------Image Search : GCSE API-------------------------------------------------
         if imageType:
             googurl = 'https://www.googleapis.com/customsearch/v1?&searchType=image&num=10&safe=off&' \
