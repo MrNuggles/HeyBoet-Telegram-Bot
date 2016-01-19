@@ -897,11 +897,11 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
             userWithCurrentChatAction = chat_id
             urlForCurrentChatAction = 'Upcoming Rocket Launches:\n\n' +\
-                                      b1['net'] + '\n*' + b1['name'] + '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')\n\n' +\
-                                      b2['net'] + '\n*' + b2['name'] + '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')\n\n' +\
-                                      b3['net'] + '\n*' + b3['name'] + '*\nLaunching from [' + b3['location']['pads'][0]['name'] + '](' + b3['location']['pads'][0]['mapURL'] + ')\n\n' +\
-                                      b4['net'] + '\n*' + b4['name'] + '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')\n\n' +\
-                                      b5['net'] + '\n*' + b5['name'] + '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')'
+                                      b1['net'] + '\n*' + b1['name'] + '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')' + ('\nWatch live at ' + b1['vidURL'] if 'vidURL' in b1 else '') + '\n\n' +\
+                                      b2['net'] + '\n*' + b2['name'] + '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')' + ('\nWatch live at ' + b2['vidURL'] if 'vidURL' in b2 else '') + '\n\n' +\
+                                      b3['net'] + '\n*' + b3['name'] + '*\nLaunching from [' + b3['location']['pads'][0]['name'] + '](' + b3['location']['pads'][0]['mapURL'] + ')' + ('\nWatch live at ' + b3['vidURL'] if 'vidURL' in b3 else '') + '\n\n' +\
+                                      b4['net'] + '\n*' + b4['name'] + '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')' + ('\nWatch live at ' + b4['vidURL'] if 'vidURL' in b4 else '') + '\n\n' +\
+                                      b5['net'] + '\n*' + b5['name'] + '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')' + ('\nWatch live at ' + b5['vidURL'] if 'vidURL' in b5 else '')
             bot.sendMessage(chat_id=chat_id, text=urlForCurrentChatAction, parse_mode=telegram.ParseMode.MARKDOWN)
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
         elif mcType:
