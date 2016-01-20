@@ -917,11 +917,26 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 userWithCurrentChatAction = chat_id
                 urlForCurrentChatAction = 'Upcoming Rocket Launches:\n\n' +\
-                                          str(blast1LocalTime) + '\n*' + b1['name'] + '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')' + ('\nWatch at ' + b1['vidURL'] if 'vidURL' in b1 else '') + '\n\n' +\
-                                          str(blast2LocalTime) + '\n*' + b2['name'] + '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')' + ('\nWatch at ' + b2['vidURL'] if 'vidURL' in b2 else '') + '\n\n' +\
-                                          str(blast3LocalTime) + '\n*' + b3['name'] + '*\nLaunching from [' + b3['location']['pads'][0]['name'] + '](' + b3['location']['pads'][0]['mapURL'] + ')' + ('\nWatch at ' + b3['vidURL'] if 'vidURL' in b3 else '') + '\n\n' +\
-                                          str(blast4LocalTime) + '\n*' + b4['name'] + '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')' + ('\nWatch at ' + b4['vidURL'] if 'vidURL' in b4 else '') + '\n\n' +\
-                                          str(blast5LocalTime) + '\n*' + b5['name'] + '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')' + ('\nWatch at ' + b5['vidURL'] if 'vidURL' in b5 else '')
+                                          str(blast1LocalTime) + \
+                                          '\n*' + b1['name'] + \
+                                          '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')' + \
+                                          ('\nWatch at ' + b1['vidURL'] if 'vidURL' in b1 else '') + '\n\n' +\
+                                          str(blast2LocalTime) + \
+                                          '\n*' + b2['name'] + \
+                                          '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')' + \
+                                          ('\nWatch at ' + b2['vidURL'] if 'vidURL' in b2 else '') + '\n\n' +\
+                                          str(blast3LocalTime) + \
+                                          '\n*' + b3['name'] + \
+                                          '*\nLaunching from [' + b3['location']['pads'][0]['name'] + '](' + b3['location']['pads'][0]['mapURL'] + ')' + \
+                                          ('\nWatch at ' + b3['vidURL'] if 'vidURL' in b3 else '') + '\n\n' +\
+                                          str(blast4LocalTime) + \
+                                          '\n*' + b4['name'] + \
+                                          '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')' + \
+                                          ('\nWatch at ' + b4['vidURL'] if 'vidURL' in b4 else '') + '\n\n' +\
+                                          str(blast5LocalTime) + \
+                                          '\n*' + b5['name'] + \
+                                          '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')' + \
+                                          ('\nWatch at ' + b5['vidURL'] if 'vidURL' in b5 else '')
                 bot.sendMessage(chat_id=chat_id, text=urlForCurrentChatAction, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
             elif mcType:
@@ -987,11 +1002,12 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 socket.timeout or socket.error or \
                 urllib2.URLError or \
                 httplib.BadStatusLine as e:
-            if not userWithCurrentChatAction == keyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID'):
+            adminGroupId = keyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID')
+            if not str(userWithCurrentChatAction) == adminGroupId:
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=requestTextForCurrentChatAction + ': ' +
                                                                         urlForCurrentChatAction)
-            if not keyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID') == '':
-                bot.sendMessage(chat_id=keyConfig.get('HeyBoet', 'ADMIN_GROUP_CHAT_ID'), text=
+            if not adminGroupId == '':
+                bot.sendMessage(chat_id=adminGroupId, text=
                 'Error: ' + e.message + '\n' +
                 'Request Text: ' + requestTextForCurrentChatAction + '\n' +
                 'Url: ' + urlForCurrentChatAction)
