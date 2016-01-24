@@ -93,6 +93,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         spacexType = message.lower() == '/spacex'  # SpaceX Launch Schedule Command
         mcType = message.lower() == '/mc'  # Minecraft server status
         cricType = message.lower() == '/cric'  # Proteas status from Cricbuzz api
+        rgetType = message.lower() == '/get'  # Random get from setsetgo api
 
         chessBoardType = message.lower() == '/getchess' or message.lower() == '/chessmove' # Show current chess game
 
@@ -144,14 +145,14 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendPhoto(chat_id=userWithCurrentChatAction,
                                   photo=urlForCurrentChatAction.encode('utf-8'),
                                   caption=(user + ': ' if not user == '' else '') +
-                                          requestText.encode('utf-8').title() +
+                                          string.capwords(requestText.encode('utf-8')) +
                                           (' ' + imagelink if len(imagelink) < 100 else ''))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find any images for ' +\
-                                              requestText
+                                              string.capwords(requestText.encode('utf-8'))
                     requestTextForCurrentChatAction = requestText
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction.encode('utf-8'))
 # ------------------------------------------------Imgur Search : Imgur API----------------------------------------------
@@ -159,7 +160,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 client_id = keyConfig.get('Imgur', 'CLIENT_ID')
                 client_secret = keyConfig.get('Imgur', 'CLIENT_SECRET')
                 client = ImgurClient(client_id, client_secret)
-                items = client.gallery_search(q=requestText.encode('utf-8'),
+                items = client.gallery_search(q=string.capwords(requestText.encode('utf-8')),
                                               advanced={'q_type': 'anigif'},
                                               sort='top',
                                               window='all',
@@ -191,7 +192,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find a gif for ' +\
-                                              requestText + '.'
+                                              string.capwords(requestText.encode('utf-8')) + '.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction.encode('utf-8'))
 # --------------------------------------------------Giphy Search : GCSE API---------------------------------------------
             elif giphyType:
@@ -212,7 +213,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find a giphy gif for '+\
-                                              requestText + '.'
+                                              string.capwords(requestText.encode('utf-8')) + '.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction,
                                     text=urlForCurrentChatAction.encode('utf-8'))
 # ------------------------------------------------Large Image Search : GCSE API-----------------------------------------
@@ -236,7 +237,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find a huge image for ' +\
-                                              requestText.encode('utf-8') + '.'
+                                              string.capwords(requestText.encode('utf-8')) + '.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # ---------------------------------------------Large GIF Search : GCSE API----------------------------------------------
             elif hugeGifType:
@@ -258,7 +259,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find any huge gifs for ' +\
-                                              requestText.encode('utf-8') + '.'
+                                              string.capwords(requestText.encode('utf-8')) + '.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # -------------------------------------------Video Search : YouTube API-------------------------------------------------
             elif vidType:
@@ -369,7 +370,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = (user + ': ' if not user == '' else '') +\
-                                              'Urban Definition For ' + requestText.title() + ":\n" + resultNum['definition'] +\
+                                              'Urban Definition For ' + string.capwords(requestText.encode('utf-8')) + ":\n" + resultNum['definition'] +\
                                               '\n\nExample:\n' + resultNum['example']
                     bot.sendMessage(chat_id=userWithCurrentChatAction,
                                     text=urlForCurrentChatAction)
@@ -378,7 +379,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction ='I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                              ', I\'m afraid I can\'t find any urban definitions for ' +\
-                                             requestText.encode('utf-8') + '.'
+                                             string.capwords(requestText.encode('utf-8')) + '.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction,
                                     text=urlForCurrentChatAction)
 # ---------------------------------------------Google Maps Places API---------------------------------------------------
@@ -836,7 +837,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                               ' you must have a username to be trusted' +\
                                               ' enough to make chess moves.'
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
-# ---------------------------------View the current state of the chess game---------------------------------------------
+# -------------------------------------View the current state of the chess game-----------------------------------------
             elif chessBoardType:
                 movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
                 movesList = (urllib.urlopen(movesUrl)).read()
@@ -901,7 +902,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                            ('' if dynmapPort == '' else '\nSee map: ' + mcServer + ':' + dynmapPort))\
                     .format(mcServer + ':' + str(mcPort), status.players.online, status.latency)
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
-# --------------------------------------------------Current Proteas match--------------------------------------------------
+# --------------------------------------------------Current Proteas match-----------------------------------------------
             elif cricType:
                 allMatchesUrl = 'http://cricscore-api.appspot.com/csa'
                 allMatches = json.load(urllib.urlopen(allMatchesUrl))
@@ -922,7 +923,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = (match[0]['si'] + '\n' + match[0]['de'])
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
-# --------------------------------------------------Search TV Shows with TVMaze API--------------------------------------------------
+# --------------------------------------------Search TV Shows with TVMaze API-------------------------------------------
             elif showType:
                 showsUrl = 'http://api.tvmaze.com/search/shows?q='
                 data = json.load(urllib.urlopen(showsUrl + requestText))
@@ -940,12 +941,15 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                               ', I\'m afraid I cannot find the TV show ' +\
                                               requestText.title()
                     bot.sendMessage(chat_id=chat_id, text=urlForCurrentChatAction)
-# --------------------------------------------------Debug send photo with certain urls--------------------------------------------------
+# ------------------------------------Debug send photo with certain urls------------------------------------------------
             elif echoImgType:
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                 userWithCurrentChatAction = chat_id
                 urlForCurrentChatAction = requestText
                 bot.sendPhoto(chat_id=chat_id, photo=urlForCurrentChatAction)
+# ----------------------------------------------------------------------------------------------------------------------
+            elif rgetType:
+                pass
 # ----------------------------------------------------------------------------------------------------------------------
             else:
                 pass
