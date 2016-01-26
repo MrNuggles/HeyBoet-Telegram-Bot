@@ -148,7 +148,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                           requestText.encode('utf-8').title() +
                                           (' ' + imagelink if len(imagelink) < 100 else ''))
                 else:
-                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                               ', I\'m afraid I can\'t find any images for ' +\
