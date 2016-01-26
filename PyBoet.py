@@ -47,11 +47,6 @@ def main():
 
 
 def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
-# Keep track of the last user to receive a chat action.
-# Satisfy pending chat actions on error.
-    userWithCurrentChatAction = ''
-    urlForCurrentChatAction = ''
-    requestTextForCurrentChatAction = ''
 
 # Request updates after the last update_id
     allUpdates = bot.getUpdates()
@@ -67,10 +62,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             data = json.load(urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') +
                                             '/getUpdates?offset=' + str(lastUpdateId)))
             bot.sendChatAction(chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING)
-            userWithCurrentChatAction = update.message.chat_id
-            urlForCurrentChatAction = 'Message queue reset.' if data['ok'] else 'Reset failed.'
-            requestTextForCurrentChatAction = keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
-            bot.sendMessage(chat_id=update.message.chat_id, text=urlForCurrentChatAction)
+            bot.sendMessage(chat_id=update.message.chat_id, text='Message queue reset.' if data['ok'] else 'Reset failed.')
             return
 
 # Pop the top for processing
@@ -86,6 +78,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # -----------------------------------------------------COMMANDS LIST----------------------------------------------------
     if message:
+# Ashley: Weird 'Unautherized' error when sending photos.
+# Keep track of the last user to receive a chat action.
+# Satisfy pending chat actions on error with a message instead of a photo.
+        userWithCurrentChatAction = ''
+        urlForCurrentChatAction = ''
+        requestTextForCurrentChatAction = ''
+
         splitText = message.split(' ', 1)
 
         bitcoinType = message.lower() == '/bitcoin'  # Bitcoin Rate Command
