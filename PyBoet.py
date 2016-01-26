@@ -78,12 +78,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # -----------------------------------------------------COMMANDS LIST----------------------------------------------------
     if message:
-# Ashley: Weird 'Unautherized' error when sending photos.
-# Keep track of the last user to receive a chat action.
-# Satisfy pending chat actions on error with a message instead of a photo.
-        userWithCurrentChatAction = ''
-        urlForCurrentChatAction = ''
-        requestTextForCurrentChatAction = ''
 
         splitText = message.split(' ', 1)
 
@@ -128,7 +122,14 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
         requestText = filter(lambda x: x in string.printable, splitText[1]) if ' ' in message else ''
         requestTextForCurrentChatAction = requestText
-        
+
+# Ashley: Added a try catch here-
+# For weird 'Unautherized' error when sending photos.
+# Keeps track of the last user to receive a chat action.
+# Satisfies pending chat actions on error with a message instead of a photo.
+        userWithCurrentChatAction = ''
+        urlForCurrentChatAction = ''
+        requestTextForCurrentChatAction = ''
         try:
 # ----------------------------------------------Image Search : GCSE API-------------------------------------------------
             if imageType:
