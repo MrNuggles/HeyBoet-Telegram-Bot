@@ -921,23 +921,23 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                           str(blast1LocalTime) + \
                                           '\n*' + b1['name'] + \
                                           '*\nLaunching from [' + b1['location']['pads'][0]['name'] + '](' + b1['location']['pads'][0]['mapURL'] + ')' + \
-                                          ('\nWatch at ' + b1['vidURL'] if 'vidURL' in b1 else '') + '\n\n' +\
+                                          ('\nWatch live at ' + b1['vidURL'] if 'vidURL' in b1 else '') + '\n\n' +\
                                           str(blast2LocalTime) + \
                                           '\n*' + b2['name'] + \
                                           '*\nLaunching from [' + b2['location']['pads'][0]['name'] + '](' + b2['location']['pads'][0]['mapURL'] + ')' + \
-                                          ('\nWatch at ' + b2['vidURL'] if 'vidURL' in b2 else '') + '\n\n' +\
+                                          ('\nWatch live at ' + b2['vidURL'] if 'vidURL' in b2 else '') + '\n\n' +\
                                           str(blast3LocalTime) + \
                                           '\n*' + b3['name'] + \
                                           '*\nLaunching from [' + b3['location']['pads'][0]['name'] + '](' + b3['location']['pads'][0]['mapURL'] + ')' + \
-                                          ('\nWatch at ' + b3['vidURL'] if 'vidURL' in b3 else '') + '\n\n' +\
+                                          ('\nWatch live at ' + b3['vidURL'] if 'vidURL' in b3 else '') + '\n\n' +\
                                           str(blast4LocalTime) + \
                                           '\n*' + b4['name'] + \
                                           '*\nLaunching from [' + b4['location']['pads'][0]['name'] + '](' + b4['location']['pads'][0]['mapURL'] + ')' + \
-                                          ('\nWatch at ' + b4['vidURL'] if 'vidURL' in b4 else '') + '\n\n' +\
+                                          ('\nWatch live at ' + b4['vidURL'] if 'vidURL' in b4 else '') + '\n\n' +\
                                           str(blast5LocalTime) + \
                                           '\n*' + b5['name'] + \
                                           '*\nLaunching from [' + b5['location']['pads'][0]['name'] + '](' + b5['location']['pads'][0]['mapURL'] + ')' + \
-                                          ('\nWatch at ' + b5['vidURL'] if 'vidURL' in b5 else '')
+                                          ('\nWatch live at ' + b5['vidURL'] if 'vidURL' in b5 else '')
                 bot.sendMessage(chat_id=chat_id, text=urlForCurrentChatAction, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
 # --------------------------------------------------Next Rocket Launch--------------------------------------------------
             elif mcType:
