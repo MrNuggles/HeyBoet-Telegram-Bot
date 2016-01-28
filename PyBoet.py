@@ -314,15 +314,16 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                         xlink = item['link']
                         if  \
                                     'xvideos.com/tags/' not in xlink \
+                                and 'xvideos.com/favorite/' not in xlink \
+                                and 'xvideos.com/?k=' not in xlink \
+                                and 'xvideos.com/tags' not in xlink \
                                 and 'pornhub.com/users/' not in xlink \
                                 and 'pornhub.com/video/search?search=' not in xlink \
                                 and 'xvideos.com/profiles/' not in xlink \
                                 and 'xnxx.com/?' not in xlink \
                                 and 'xnxx.com/tags/' not in xlink \
                                 and 'xhamster.com/stories_search' not in xlink \
-                                and 'xvideos.com/tags' not in xlink \
                                 and 'redtube.com/pornstar/' not in xlink \
-                                and 'xvideos.com/favorite/' not in xlink \
                                 :
                             bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                             userWithCurrentChatAction = chat_id
