@@ -49,7 +49,10 @@ def main():
 def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # Request updates after the last update_id
-    allUpdates = bot.getUpdates()
+    try:
+        allUpdates = bot.getUpdates()
+    except URLError as e:
+        print e.message
 
 # If empty
     if len(allUpdates) <= 0:
@@ -749,7 +752,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     if len(requestText.split(' ', 1)) > 1:
                         adminOverride = requestText.split(' ', 1)[1] == keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY')
                         requestText = requestText.replace(' ' + keyConfig.get('HeyBoet', 'ADMIN_COMMAND_KEY'), '')
-                    moveUrl = 'http://riot.so/cgi-bin/chess?time=30&move='
+                    moveUrl = 'http://riot.so/chess.html?time=30&move='
                     formatedRequestText = requestText.lower()\
                         .replace('1', 'i')\
                         .replace('2', 'j')\
@@ -785,10 +788,10 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                 lastUserWhoMoved[update.message.chat.id] = user
                         if not userRestricted or adminOverride:
                             if isMoveValid:
-                                movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                                movesUrl = 'http://riot.so/chess.html?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()[len('validmoves'):]
                                 if not movesList == '':
-                                    boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                                    boardUrl = 'http://riot.so/chess.html?move=board'
                                     boardResponse = (urllib.urlopen(boardUrl)).read()
                                     boardImageUrl = str(boardResponse.split(' ', 1)[1])
                                     boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
@@ -800,14 +803,14 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                                   photo=urlForCurrentChatAction,
                                                   caption='+ A B C D E F G H\n1\n2\n3\n4\n5\n6\n7\n8')
                                 else:
-                                    urllib.urlopen('http://riot.so/cgi-bin/chess?move=reset')
+                                    urllib.urlopen('http://riot.so/chess.html?move=reset')
                                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                                     userWithCurrentChatAction = chat_id
                                     urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
                                                               ', I\'m afraid the chess game is over.'
                                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
                             else:
-                                movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                                movesUrl = 'http://riot.so/chess.html?move=moves'
                                 movesList = (urllib.urlopen(movesUrl)).read()
                                 formatedmovesList = movesList\
                                     .replace('1', 'i')\
@@ -842,7 +845,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # -------------------------------------View the current state of the chess game-----------------------------------------
             elif chessBoardType:
-                movesUrl = 'http://riot.so/cgi-bin/chess?move=moves'
+                movesUrl = 'http://riot.so/chess.html?move=moves'
                 movesList = (urllib.urlopen(movesUrl)).read()
                 formatedmovesList = movesList\
                     .replace('1', 'i')\
@@ -862,7 +865,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     .replace('n', '3')\
                     .replace('o', '2')\
                     .replace('p', '1')
-                boardUrl = 'http://riot.so/cgi-bin/chess?move=board'
+                boardUrl = 'http://riot.so/chess.html?move=board'
                 boardResponse = (urllib.urlopen(boardUrl)).read()
                 boardImageUrl = str(boardResponse.split(' ', 1)[1])
                 boardUrlImageBase = 'http://www.eddins.net/steve/chess/ChessImager/ChessImager.php?fen='
