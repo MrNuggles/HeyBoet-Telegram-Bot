@@ -647,7 +647,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                            keyConfig.get('Google', 'GCSE_APP_ID') + '&q='
                 realUrl = booksUrl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if data['totalItems'] >= 1:
+                if 'totalItems' in data and data['totalItems'] >= 1:
                     bookData = data['items'][0]['volumeInfo']
                     googleBooksUrl = data['items'][0]['accessInfo']['webReaderLink']
                     if 'imageLinks' in bookData:
