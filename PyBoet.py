@@ -49,6 +49,7 @@ def main():
 def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # Request updates after the last update_id
+    allUpdates = []
     try:
         allUpdates = bot.getUpdates()
     except URLError as e:
