@@ -145,15 +145,28 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 realUrl = googurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
                 if 'items' in data and len(data['items']) >= 9:
-                    imagelink = data['items'][random.randint(0, 9)]['link']
-                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    userWithCurrentChatAction = chat_id
-                    urlForCurrentChatAction = imagelink
-                    bot.sendPhoto(chat_id=userWithCurrentChatAction,
-                                  photo=urlForCurrentChatAction.encode('utf-8'),
-                                  caption=(user + ': ' if not user == '' else '') +
-                                          string.capwords(requestText.encode('utf-8')) +
-                                          (' ' + imagelink if len(imagelink) < 100 else ''))
+                    imagelink = 'x-raw-image:///'
+                    offset = 0
+                    while imagelink.startswith('x-raw-image:///') and offset < 10 and offset < len(data['items']):
+                        imagelink = data['items'][random.randint(0, 9)+offset]['link']
+                        offset = offset+1
+                    if not imagelink.startswith('x-raw-image:///'):
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        userWithCurrentChatAction = chat_id
+                        urlForCurrentChatAction = imagelink
+                        bot.sendPhoto(chat_id=userWithCurrentChatAction,
+                                      photo=urlForCurrentChatAction.encode('utf-8'),
+                                      caption=(user + ': ' if not user == '' else '') +
+                                              string.capwords(requestText.encode('utf-8')) +
+                                              (' ' + imagelink if len(imagelink) < 100 else ''))
+                    else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
+                        urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
+                                                  ', I\'m afraid I can\'t find any images for ' +\
+                                                  string.capwords(requestText.encode('utf-8'))
+                        requestTextForCurrentChatAction = requestText
+                        bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction.encode('utf-8'))
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
@@ -231,14 +244,26 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 realUrl = googurl + requestText.encode('utf-8') + "&imgSize=huge"
                 data = json.load(urllib.urlopen(realUrl))
                 if 'items' in data:
-                    imagelink = data['items'][0]['link']
-                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
-                    userWithCurrentChatAction = chat_id
-                    urlForCurrentChatAction = imagelink
-                    bot.sendPhoto(chat_id=userWithCurrentChatAction, photo=urlForCurrentChatAction.encode('utf-8'),
-                                  caption=(user + ': ' if not user == '' else '') +
-                                          requestTextForCurrentChatAction.title().encode('utf-8') +
-                                          (' ' + imagelink if len(imagelink) < 100 else ''))
+                    imagelink = 'x-raw-image:///'
+                    offset = 0
+                    while imagelink.startswith('x-raw-image:///') and offset < 10 and offset < len(data['items']):
+                        imagelink = data['items'][offset]['link']
+                        offset = offset+1
+                    if not imagelink.startswith('x-raw-image:///'):
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+                        userWithCurrentChatAction = chat_id
+                        urlForCurrentChatAction = imagelink
+                        bot.sendPhoto(chat_id=userWithCurrentChatAction, photo=urlForCurrentChatAction.encode('utf-8'),
+                                      caption=(user + ': ' if not user == '' else '') +
+                                              requestTextForCurrentChatAction.title().encode('utf-8') +
+                                              (' ' + imagelink if len(imagelink) < 100 else ''))
+                    else:
+                        bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                        userWithCurrentChatAction = chat_id
+                        urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
+                                                  ', I\'m afraid I can\'t find a huge image for ' +\
+                                                  string.capwords(requestText.encode('utf-8')) + '.'
+                        bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
                 else:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
