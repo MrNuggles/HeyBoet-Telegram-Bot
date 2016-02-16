@@ -18,6 +18,13 @@ import soundcloud
 import feedparser
 import tungsten
 import requests
+
+#reverse image search imports:
+from bs4 import BeautifulSoup
+from StringIO import StringIO
+import pycurl, json
+import certifi
+
 from mcstatus import MinecraftServer
 
 from imgurpython import ImgurClient
@@ -122,6 +129,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         showType = splitText[0].lower() == '/getshow' if ' ' in message else False # Search TV Shows with TVMaze API
         echoImgType = splitText[0].lower() == '/echoimg' if ' ' in message else False # For debugging problem photo urls
         lyricsType = splitText[0].lower() == '/getlyrics' if ' ' in message else False # Get lyrics from musix api
+        reverseImageType = splitText[0].lower() == '/reverseimage' if ' ' in message else False # Get reverse image results from google
 
         figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
         isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -1080,6 +1088,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                               ', I\'m afraid I can\'t find any tracks for the lyrics ' +\
                                               requestText.encode('utf-8')
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
+# -------------------------------------------Perform google reverse image search----------------------------------------
+            elif reverseImageType:
+                code = retrieve(requestText)
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
+                urlForCurrentChatAction = google_image_results_parser(code)
+                bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # ----------------------------------------------------------------------------------------------------------------------
             elif rgetType:
                 pass
@@ -1102,6 +1117,48 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 # Offset the update queue to the next update
     urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update.update_id + 1))
 
+# retrieves reverse search html for processing. This actually does reverse image lookups
+def retrieve(image_url):
+    returned_code = StringIO()
+    full_url = 'https://www.google.com/searchbyimage?&image_url=' + image_url
+    conn = pycurl.Curl()
+    conn.setopt(conn.URL, str(full_url))
+    conn.setopt(conn.CAINFO, certifi.where())
+    conn.setopt(conn.FOLLOWLOCATION, 1)
+    conn.setopt(conn.USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11')
+    conn.setopt(conn.WRITEFUNCTION, returned_code.write)
+    conn.perform()
+    conn.close()
+    return returned_code.getvalue()
+
+# Parses reverse search html and assigns to array using beautifulsoup
+def google_image_results_parser(code):
+    soup = BeautifulSoup(code, "html.parser")
+
+    # initialize 2d array
+    whole_array = {'links':[],
+                   'description':[],
+                   'title':[],
+                   'result_qty':[]}
+
+    # Links for all the search results
+    for li in soup.findAll('li', attrs={'class':'g'}):
+        sLink = li.find('a')
+        whole_array['links'].append(sLink['href'])
+
+    # Search Result Description
+    for desc in soup.findAll('span', attrs={'class':'st'}):
+        whole_array['description'].append(desc.get_text())
+
+    # Search Result Title
+    for title in soup.findAll('h3', attrs={'class':'r'}):
+        whole_array['title'].append(title.get_text())
+
+    # Number of results
+    for result_qty in soup.findAll('div', attrs={'id':'resultStats'}):
+        whole_array['result_qty'].append(result_qty.get_text())
+
+    return json.dumps(whole_array)
 
 if __name__ == '__main__':
     main()
