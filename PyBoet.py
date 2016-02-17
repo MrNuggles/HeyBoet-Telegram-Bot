@@ -59,11 +59,12 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     allUpdates = []
     try:
         allUpdates = bot.getUpdates()
-    except URLError as e:
+    except URLError or telegram.error.TelegramError as e:
         print e.message
 
 # If empty
     if len(allUpdates) <= 0:
+        sleep(60000)
         return
 
 # If reset
