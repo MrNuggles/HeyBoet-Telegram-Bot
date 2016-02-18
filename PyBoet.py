@@ -64,7 +64,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # If empty
     if len(allUpdates) <= 0:
-        sleep(60)
+        sleep(8)
         return
 
 # If reset
