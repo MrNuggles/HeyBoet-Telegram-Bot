@@ -160,10 +160,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 if 'items' in data and len(data['items']) >= 9:
                     imagelink = 'x-raw-image:///'
                     offset = 0
-                    while imagelink.startswith('x-raw-image:///') and offset < 10 and offset < len(data['items']):
-                        imagelink = data['items'][random.randint(0, 9)+offset]['link']
+                    randint = random.randint(0, 9)
+                    while imagelink.startswith('x-raw-image:///') and \
+                                    offset < 10 and \
+                                    randint + offset < len(data['items']):
+                        imagelink = data['items'][randint + offset]['link']
                         offset = offset+1
-                    if not imagelink.startswith('x-raw-image:///'):
+                    if not imagelink.startswith('x-raw-image:///') and not imagelink == '':
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                         userWithCurrentChatAction = chat_id
                         urlForCurrentChatAction = imagelink
