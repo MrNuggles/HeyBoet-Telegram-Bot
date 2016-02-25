@@ -425,7 +425,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 dicurl = 'http://api.urbandictionary.com/v0/define?term='
                 realUrl = dicurl + requestText.encode('utf-8')
                 data = json.load(urllib.urlopen(realUrl))
-                if len(data['list']) >= 1:
+                if 'list' in data and len(data['list']) >= 1:
                     resultNum = data['list'][random.randint(0, len(data['list']) - 1)]
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
@@ -1094,9 +1094,34 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 # -------------------------------------------Perform google reverse image search----------------------------------------
             elif reverseImageType:
                 code = retrieve(requestText)
+                jsonResults = json.loads(google_image_results_parser(code))
+                resultsText = ''
+                if 'result_qty' in jsonResults and len(jsonResults['result_qty']) > 0:
+                    for jsonResult in jsonResults['result_qty']:
+                        resultsText += jsonResult + '\n'
+                if 'title' in jsonResults and len(jsonResults['title']) > 0:
+                    for jsonResult in jsonResults['title']:
+                        resultsText += jsonResult + '\n'
+                if 'description' in jsonResults and len(jsonResults['description']) > 0:
+                    for jsonResult in jsonResults['description']:
+                        resultsText += (jsonResult[jsonResult.index('-')+2:] + '\n' if '-' in jsonResult else '')
+                if 'links' in jsonResults and len(jsonResults['links']) > 0:
+                    for jsonResult in jsonResults['links']:
+                        resultsText += jsonResult + '\n'
+                resultLinks = code[code.index('Search Results'):].split('href=')
+                for resultLink in resultLinks[1:]:
+                    resultLink = resultLink[1:]
+                    foundLink = resultLink[:resultLink.index('"')]
+                    if foundLink != '#' and \
+                                    foundLink != 'javascript:;' and \
+                                    foundLink != 'javascript:void(0)' and \
+                                    foundLink != '//www.google.com/intl/en/policies/privacy/?fg=1' and \
+                                    foundLink != '//www.google.com/intl/en/policies/terms/?fg=1' and \
+                                    len(foundLink) < 50:
+                        resultsText += foundLink + '\n'
                 bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                 userWithCurrentChatAction = chat_id
-                urlForCurrentChatAction = google_image_results_parser(code)
+                urlForCurrentChatAction = resultsText
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # ----------------------------------------------------------------------------------------------------------------------
             elif rgetType:
