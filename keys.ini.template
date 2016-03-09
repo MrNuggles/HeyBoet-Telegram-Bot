@@ -24,3 +24,6 @@ CLIENT_SECRET: {Imgur Client Secret goes here}
 SVR_ADDR: {Your Minecraft Server Address here}
 SVR_PORT: {Your Minecraft Server Port here}
 DYNMAP_PORT: {Your Minecraft Server DynMap Port here}
+
+[MusixMatch]
+APP_ID: {Your MusixMatch App ID here}
