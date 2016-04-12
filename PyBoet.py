@@ -130,7 +130,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         echoImgType = splitText[0].lower() == '/echoimg' if ' ' in message else False # For debugging problem photo urls
         lyricsType = splitText[0].lower() == '/getlyrics' if ' ' in message else False # Get lyrics from musix api
         reverseImageType = splitText[0].lower() == '/reverseimage' if ' ' in message else False # Get reverse image results from google
-        nsfwDetectorType = splitText[0].lower() == '/detectnsfw' if ' ' in message else False # Get nsfw info
 
         figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
         isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -167,16 +166,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                         imagelink = data['items'][randint + offset]['link']
                         offset = offset+1
                     if not imagelink.startswith('x-raw-image:///') and not imagelink == '':
-                        MashapeApiKey = keyConfig.get('Mashape', 'API_KEY')
-                        nsfwRating = ''
-                        if (MashapeApiKey != ''):
-                            urlEncodedRequestText = urllib.quote(imagelink)
-                            nsfwDetectorUrl = urllib2.Request(
-                                'https://sphirelabs-advanced-porn-nudity-and-adult-content-detection.p.mashape.com/v1/get/index.php?url=' +
-                                urlEncodedRequestText, headers={'X-Mashape-Key': MashapeApiKey})
-                            data = json.load(urllib2.urlopen(nsfwDetectorUrl))
-                            if 'Skin Colors' in data:
-                                nsfwRating = data['Skin Colors']
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
                         userWithCurrentChatAction = chat_id
                         urlForCurrentChatAction = imagelink
@@ -184,8 +173,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                                       photo=urlForCurrentChatAction.encode('utf-8'),
                                       caption=(user + ': ' if not user == '' else '') +
                                               string.capwords(requestText.encode('utf-8')) +
-                                              ('\nNSFW Rating: ' + nsfwRating if nsfwRating != '' else '') +
-                                              ('\n' + imagelink if len(imagelink) < 100 else ''))
+                                              (' ' + imagelink if len(imagelink) < 100 else ''))
                     else:
                         bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                         userWithCurrentChatAction = chat_id
@@ -1135,18 +1123,6 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 userWithCurrentChatAction = chat_id
                 urlForCurrentChatAction = resultsText
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
-# -----------------------------------------------Get lyrics From musix match--------------------------------------------
-            elif nsfwDetectorType:
-                nsfwDetectorUrl = urllib2.Request(
-                    'https://sphirelabs-advanced-porn-nudity-and-adult-content-detection.p.mashape.com/v1/get/index.php?url=' +
-                    urllib.quote(requestText), headers={'X-Mashape-Key': keyConfig.get('Mashape', 'API_KEY')})
-                data = json.load(urllib2.urlopen(nsfwDetectorUrl))
-                nsfwRating = ''
-                if 'Skin Colors' in data:
-                    nsfwRating = data['Skin Colors']
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                userWithCurrentChatAction = chat_id
-                bot.sendMessage(chat_id=chat_id, text=nsfwRating)
 # ----------------------------------------------------------------------------------------------------------------------
             elif rgetType:
                 pass
