@@ -130,6 +130,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
         echoImgType = splitText[0].lower() == '/echoimg' if ' ' in message else False # For debugging problem photo urls
         lyricsType = splitText[0].lower() == '/getlyrics' if ' ' in message else False # Get lyrics from musix api
         reverseImageType = splitText[0].lower() == '/reverseimage' if ' ' in message else False # Get reverse image results from google
+        steamGameType = splitText[0].lower() == '/getgame' if ' ' in message else False # Get game details from steam
 
         figType = message.lower().startswith('/getfig')  # Get a picture of a fig (common /getgif typo)
         isisType = message.lower().startswith('/isis')  # Get latest isis news (common /iss typo)
@@ -1093,7 +1094,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # -------------------------------------------Perform google reverse image search----------------------------------------
             elif reverseImageType:
-                code = retrieve(requestText)
+                code = retrieve_google_image_search_results(requestText)
                 jsonResults = json.loads(google_image_results_parser(code))
                 resultsText = ''
                 if 'result_qty' in jsonResults and len(jsonResults['result_qty']) > 0:
@@ -1123,6 +1124,16 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 userWithCurrentChatAction = chat_id
                 urlForCurrentChatAction = resultsText
                 bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
+# -------------------------------------------Perform google reverse image search----------------------------------------
+            elif steamGameType:
+                code = urllib.urlopen("http://store.steampowered.com/search/?term=" + requestText).read()
+                appId = steam_results_parser(code)
+                code = urllib.urlopen("http://store.steampowered.com/app/" + appId).read()
+                gameResults = steam_game_parser(code)
+                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                userWithCurrentChatAction = chat_id
+                urlForCurrentChatAction = "http://store.steampowered.com/app/" + appId + "\n" + gameResults
+                bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # ----------------------------------------------------------------------------------------------------------------------
             elif rgetType:
                 pass
@@ -1146,14 +1157,14 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
     urllib.urlopen('https://api.telegram.org/bot' + keyConfig.get('Telegram', 'TELE_BOT_ID') + '/getUpdates?offset=' + str(update.update_id + 1))
 
 # retrieves reverse search html for processing. This actually does reverse image lookups
-def retrieve(image_url):
+def retrieve_google_image_search_results(image_url):
     returned_code = StringIO()
-    full_url = 'https://www.google.com/searchbyimage?&image_url=' + image_url
+    full_url = "https://www.google.com/searchbyimage?&image_url=" + image_url
     conn = pycurl.Curl()
     conn.setopt(conn.URL, str(full_url))
     conn.setopt(conn.CAINFO, certifi.where())
     conn.setopt(conn.FOLLOWLOCATION, 1)
-    conn.setopt(conn.USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11')
+    conn.setopt(conn.USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11")
     conn.setopt(conn.WRITEFUNCTION, returned_code.write)
     conn.perform()
     conn.close()
@@ -1187,6 +1198,36 @@ def google_image_results_parser(code):
         whole_array['result_qty'].append(result_qty.get_text())
 
     return json.dumps(whole_array)
+
+def steam_results_parser(code):
+    appIdTag = "data-ds-appid"
+    ancherIndex = code.find(appIdTag)
+    extraIndices = len(appIdTag)+len("=\"")
+    startIndex = ancherIndex + extraIndices
+    code = code[startIndex:]
+    endIndex = code.index("\"")
+    appId = code[:endIndex]
+    return appId
+
+def steam_game_parser(code):
+    appIdTag = "category_block"
+    ancherIndex = code.find(appIdTag)
+    extraIndices = len(appIdTag + "\">\r\n\r\n\t\t\t\t\t\t\t")
+    startIndex = ancherIndex + extraIndices
+    code = code[startIndex:]
+    endIndex = code.index("\t</div>")
+    categoryBlock = code[:endIndex]
+
+    categoryBlockAnchor = "</a></div>"
+    featureList = ""
+    anchorCount = 0
+    while categoryBlockAnchor in categoryBlock:
+        endIndex = categoryBlock.index(categoryBlockAnchor) + len(categoryBlockAnchor)
+        if anchorCount % 2 == 1:
+            featureList += categoryBlock[categoryBlock.index(">")+1:endIndex].replace(categoryBlockAnchor, "") + "\n"
+        categoryBlock = categoryBlock[endIndex:]
+        anchorCount += 1
+    return featureList
 
 if __name__ == '__main__':
     main()
