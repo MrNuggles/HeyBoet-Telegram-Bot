@@ -1130,10 +1130,19 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
                 appId = steam_results_parser(code)
                 code = urllib.urlopen("http://store.steampowered.com/app/" + appId).read()
                 gameResults = steam_game_parser(code)
-                bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-                userWithCurrentChatAction = chat_id
-                urlForCurrentChatAction = "http://store.steampowered.com/app/" + appId + "\n" + gameResults
-                bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
+                if gameResults:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
+                    urlForCurrentChatAction = gameResults + "\n" + "http://store.steampowered.com/app/" + appId
+                    bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction,
+                                    disable_web_page_preview=True, parse_mode='Markdown')
+                else:
+                    bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+                    userWithCurrentChatAction = chat_id
+                    urlForCurrentChatAction = 'I\'m sorry ' + (user if not user == '' else 'Dave') +\
+                                              ', I\'m afraid I can\'t find the steam game ' +\
+                                              requestText.encode('utf-8')
+                    bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction)
 # ----------------------------------------------------------------------------------------------------------------------
             elif rgetType:
                 pass
@@ -1203,15 +1212,66 @@ def steam_results_parser(code):
     soup = BeautifulSoup(code, "html.parser")
     resultList = []
     for resultRow in soup.findAll("a", attrs={"class":"search_result_row"}):
-        resultList.append(resultRow["data-ds-appid"])
+        if "data-ds-appid" in resultRow.attrs:
+            resultList.append(resultRow["data-ds-appid"])
+        if "data-ds-bundleid" in resultRow.attrs:
+            resultList.append(resultRow["data-ds-bundleid"])
     return resultList[0]
 
 def steam_game_parser(code):
+    code = resolve_steam_age_gate(code)
     soup = BeautifulSoup(code, "html.parser")
+    AllGameDetailsFormatted = ""
+
+    titleDiv = soup.find("div", attrs={"class":"apphub_AppName"})
+    if titleDiv:
+        gameTitle = titleDiv.string
+        AllGameDetailsFormatted += "*" + gameTitle + "*" + "\n"
+
+    descriptionDiv = soup.find("div", attrs={"class":"game_description_snippet"})
+    if descriptionDiv:
+        descriptionSnippet = descriptionDiv.string.replace("\r", "").replace("\n", "").replace("\t", "")
+        AllGameDetailsFormatted += descriptionSnippet + "\n"
+
+    dateSpan = soup.find("span", attrs={"class":"date"})
+    if dateSpan:
+        releaseDate = dateSpan.string
+        AllGameDetailsFormatted += "Release Date: " + releaseDate + "\n"
+
     featureList = ""
-    for featureLink in soup.findAll("a", attrs={"class":"name"}):
-        featureList += featureLink.string + "\n"
-    return featureList
+    featureLinks = soup.findAll("a", attrs={"class":"name"})
+    if len(featureLinks) > 0:
+        for featureLink in featureLinks:
+            featureList += "> " + featureLink.string + "\n"
+        AllGameDetailsFormatted += "Features:\n" + featureList
+
+    tagList = ""
+    tagLinks = soup.findAll("a", attrs={"class":"app_tag"})
+    if len(tagLinks) > 0:
+        for tagLink in tagLinks:
+            tagList += "> " + tagLink.string.replace("\r", "").replace("\n", "").replace("\t", "") + "\n"
+        AllGameDetailsFormatted += "Tags:\n" + tagList
+
+    reviewRows = ""
+    reviewDivs = soup.findAll("div", attrs={"class":"user_reviews_summary_row"})
+    if len(reviewDivs) > 0:
+        for reviewRow in reviewDivs:
+            reviewRowSubtitle = reviewRow.find("div", attrs={"class":"subtitle column"}).string
+            reviewRowText = reviewRow.find("span", attrs={"class":"nonresponsive_hidden responsive_reviewdesc"}).string.replace("\r", "").replace("\n", "").replace("\t", "")
+            reviewRows += reviewRowSubtitle + "\n" + reviewRowText + "\n"
+        AllGameDetailsFormatted += "Reviews:\n" + reviewRows
+
+    return AllGameDetailsFormatted
+
+def resolve_steam_age_gate(code):
+    soup = BeautifulSoup(code, "html.parser")
+    ageGateDiv = soup.find("form", attrs={"id":"agecheck_form"})
+    if not ageGateDiv:
+        return code
+    ageGateUrl = ageGateDiv["action"]
+    urllib.urlopen(ageGateUrl + "?ageDay=30&ageMonth=April&ageYear=1988")
+    storeUrl = ageGateUrl.replace("/agecheck", "")
+    return urllib.urlopen(storeUrl).read()
 
 if __name__ == '__main__':
     main()
