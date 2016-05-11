@@ -1128,12 +1128,13 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
             elif steamGameType:
                 code = urllib.urlopen("http://store.steampowered.com/search/?term=" + requestText).read()
                 appId = steam_results_parser(code)
-                code = urllib.urlopen("http://store.steampowered.com/app/" + appId).read()
-                gameResults = steam_game_parser(code)
+                steamGameLink = "http://store.steampowered.com/app/" + appId
+                code = urllib.urlopen(steamGameLink).read()
+                gameResults = steam_game_parser(code, steamGameLink)
                 if gameResults:
                     bot.sendChatAction(chat_id=chat_id, action=telegram.ChatAction.TYPING)
                     userWithCurrentChatAction = chat_id
-                    urlForCurrentChatAction = gameResults + "\n" + "http://store.steampowered.com/app/" + appId
+                    urlForCurrentChatAction = gameResults
                     bot.sendMessage(chat_id=userWithCurrentChatAction, text=urlForCurrentChatAction,
                                     disable_web_page_preview=True, parse_mode='Markdown')
                 else:
@@ -1218,7 +1219,7 @@ def steam_results_parser(code):
             resultList.append(resultRow["data-ds-bundleid"])
     return resultList[0]
 
-def steam_game_parser(code):
+def steam_game_parser(code, link):
     code = resolve_steam_age_gate(code)
     soup = BeautifulSoup(code, "html.parser")
     AllGameDetailsFormatted = ""
@@ -1233,6 +1234,9 @@ def steam_game_parser(code):
         descriptionSnippet = descriptionDiv.string.replace("\r", "").replace("\n", "").replace("\t", "")
         AllGameDetailsFormatted += descriptionSnippet + "\n"
 
+    if AllGameDetailsFormatted:
+        AllGameDetailsFormatted += link + "\n"
+
     dateSpan = soup.find("span", attrs={"class":"date"})
     if dateSpan:
         releaseDate = dateSpan.string
@@ -1242,14 +1246,14 @@ def steam_game_parser(code):
     featureLinks = soup.findAll("a", attrs={"class":"name"})
     if len(featureLinks) > 0:
         for featureLink in featureLinks:
-            featureList += "> " + featureLink.string + "\n"
+            featureList += "     " + featureLink.string + "\n"
         AllGameDetailsFormatted += "Features:\n" + featureList
 
     tagList = ""
     tagLinks = soup.findAll("a", attrs={"class":"app_tag"})
     if len(tagLinks) > 0:
         for tagLink in tagLinks:
-            tagList += "> " + tagLink.string.replace("\r", "").replace("\n", "").replace("\t", "") + "\n"
+            tagList += "     " + tagLink.string.replace("\r", "").replace("\n", "").replace("\t", "") + "\n"
         AllGameDetailsFormatted += "Tags:\n" + tagList
 
     reviewRows = ""
@@ -1258,8 +1262,11 @@ def steam_game_parser(code):
         for reviewRow in reviewDivs:
             reviewRowSubtitle = reviewRow.find("div", attrs={"class":"subtitle column"}).string
             reviewRowText = reviewRow.find("span", attrs={"class":"nonresponsive_hidden responsive_reviewdesc"}).string.replace("\r", "").replace("\n", "").replace("\t", "")
-            reviewRows += reviewRowSubtitle + "\n" + reviewRowText + "\n"
+            reviewRows += "     " + reviewRowSubtitle + reviewRowText.replace("-", "").replace(" user reviews", "") + "\n"
         AllGameDetailsFormatted += "Reviews:\n" + reviewRows
+
+    if AllGameDetailsFormatted.endswith("\n"):
+        AllGameDetailsFormatted = AllGameDetailsFormatted[:AllGameDetailsFormatted.rfind("\n")]
 
     return AllGameDetailsFormatted
 
