@@ -1264,10 +1264,10 @@ def steam_game_parser(code):
     return AllGameDetailsFormatted
 
 def resolve_steam_age_gate(code):
+    if "agecheck_form" not in code:
+        return code
     soup = BeautifulSoup(code, "html.parser")
     ageGateDiv = soup.find("form", attrs={"id":"agecheck_form"})
-    if not ageGateDiv:
-        return code
     ageGateUrl = ageGateDiv["action"]
     urllib.urlopen(ageGateUrl + "?ageDay=30&ageMonth=April&ageYear=1988")
     storeUrl = ageGateUrl.replace("/agecheck", "")
