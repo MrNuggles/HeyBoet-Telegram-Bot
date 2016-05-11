@@ -1175,58 +1175,42 @@ def google_image_results_parser(code):
     soup = BeautifulSoup(code, "html.parser")
 
     # initialize 2d array
-    whole_array = {'links':[],
-                   'description':[],
-                   'title':[],
-                   'result_qty':[]}
+    whole_array = {"links":[],
+                   "description":[],
+                   "title":[],
+                   "result_qty":[]}
 
     # Links for all the search results
-    for li in soup.findAll('li', attrs={'class':'g'}):
-        sLink = li.find('a')
-        whole_array['links'].append(sLink['href'])
+    for li in soup.findAll("li", attrs={"class":"g"}):
+        sLink = li.find("a")
+        whole_array["links"].append(sLink["href"])
 
     # Search Result Description
-    for desc in soup.findAll('span', attrs={'class':'st'}):
-        whole_array['description'].append(desc.get_text())
+    for desc in soup.findAll("span", attrs={"class":"st"}):
+        whole_array["description"].append(desc.get_text())
 
     # Search Result Title
-    for title in soup.findAll('h3', attrs={'class':'r'}):
-        whole_array['title'].append(title.get_text())
+    for title in soup.findAll("h3", attrs={"class":"r"}):
+        whole_array["title"].append(title.get_text())
 
     # Number of results
-    for result_qty in soup.findAll('div', attrs={'id':'resultStats'}):
-        whole_array['result_qty'].append(result_qty.get_text())
+    for result_qty in soup.findAll("div", attrs={"id":"resultStats"}):
+        whole_array["result_qty"].append(result_qty.get_text())
 
     return json.dumps(whole_array)
 
 def steam_results_parser(code):
-    appIdTag = "data-ds-appid"
-    ancherIndex = code.find(appIdTag)
-    extraIndices = len(appIdTag)+len("=\"")
-    startIndex = ancherIndex + extraIndices
-    code = code[startIndex:]
-    endIndex = code.index("\"")
-    appId = code[:endIndex]
-    return appId
+    soup = BeautifulSoup(code, "html.parser")
+    resultList = []
+    for resultRow in soup.findAll("a", attrs={"class":"search_result_row"}):
+        resultList.append(resultRow["data-ds-appid"])
+    return resultList[0]
 
 def steam_game_parser(code):
-    appIdTag = "category_block"
-    ancherIndex = code.find(appIdTag)
-    extraIndices = len(appIdTag + "\">\r\n\r\n\t\t\t\t\t\t\t")
-    startIndex = ancherIndex + extraIndices
-    code = code[startIndex:]
-    endIndex = code.index("\t</div>")
-    categoryBlock = code[:endIndex]
-
-    categoryBlockAnchor = "</a></div>"
+    soup = BeautifulSoup(code, "html.parser")
     featureList = ""
-    anchorCount = 0
-    while categoryBlockAnchor in categoryBlock:
-        endIndex = categoryBlock.index(categoryBlockAnchor) + len(categoryBlockAnchor)
-        if anchorCount % 2 == 1:
-            featureList += categoryBlock[categoryBlock.index(">")+1:endIndex].replace(categoryBlockAnchor, "") + "\n"
-        categoryBlock = categoryBlock[endIndex:]
-        anchorCount += 1
+    for featureLink in soup.findAll("a", attrs={"class":"name"}):
+        featureList += featureLink.string + "\n"
     return featureList
 
 if __name__ == '__main__':
