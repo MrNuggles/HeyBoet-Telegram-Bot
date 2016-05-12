@@ -1253,17 +1253,8 @@ def steam_game_parser(code, link):
     featureLinks = soup.findAll("a", attrs={"class":"name"})
     if len(featureLinks) > 0:
         for featureLink in featureLinks:
-            featureList += "     " + featureLink.string + "\n"
+            featureList += "     " + featureLink.string.replace("Seated", "Will make you shit yourself") + "\n"
         AllGameDetailsFormatted += "Features:\n" + featureList
-
-    tagList = ""
-    tagLinks = soup.findAll("a", attrs={"class":"app_tag"})
-    if len(tagLinks) > 0:
-        for tagLink in tagLinks:
-            tagList += tagLink.string.replace("\r", "").replace("\n", "").replace("\t", "") + ", "
-        AllGameDetailsFormatted += "Tags:\n`" + tagList
-    if AllGameDetailsFormatted.endswith(", "):
-        AllGameDetailsFormatted = AllGameDetailsFormatted[:AllGameDetailsFormatted.rfind(", ")]
 
     reviewRows = ""
     reviewDivs = soup.findAll("div", attrs={"class":"user_reviews_summary_row"})
@@ -1277,11 +1268,19 @@ def steam_game_parser(code, link):
             if reviewSummaryDiv != "No user reviews":
                 reviewRows += "     " + reviewSubtitleDiv + reviewSummaryDiv.replace("-", "").replace(" user reviews", "").replace(" of the ", " of ") + "\n"
         if reviewRows:
-            AllGameDetailsFormatted += "`\n" + "Reviews:\n" + reviewRows
-        else:
-            AllGameDetailsFormatted += "`"
-            if AllGameDetailsFormatted.endswith("\n"):
-                AllGameDetailsFormatted = AllGameDetailsFormatted[:AllGameDetailsFormatted.rfind("\n")]
+            AllGameDetailsFormatted += "Reviews:\n" + reviewRows
+        if AllGameDetailsFormatted.endswith("\n"):
+            AllGameDetailsFormatted = AllGameDetailsFormatted[:AllGameDetailsFormatted.rfind("\n")]
+
+    tagList = ""
+    tagLinks = soup.findAll("a", attrs={"class":"app_tag"})
+    if len(tagLinks) > 0:
+        for tagLink in tagLinks:
+            tagList += tagLink.string.replace("\r", "").replace("\n", "").replace("\t", "") + ", "
+        AllGameDetailsFormatted += "\n" + "Tags:\n`" + tagList
+    if AllGameDetailsFormatted.endswith(", "):
+        AllGameDetailsFormatted = AllGameDetailsFormatted[:AllGameDetailsFormatted.rfind(", ")]
+        AllGameDetailsFormatted += "`"
 
     return AllGameDetailsFormatted
 
