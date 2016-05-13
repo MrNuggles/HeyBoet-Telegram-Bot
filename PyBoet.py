@@ -89,6 +89,7 @@ def getUpdatesLoop(bot, keyConfig, lastUserWhoMoved):
 
 # -----------------------------------------------------COMMANDS LIST----------------------------------------------------
     if message:
+        message = message.replace(bot.name, "")
 
         splitText = message.split(' ', 1)
 
