@@ -27,3 +27,6 @@ DYNMAP_PORT: {Your Minecraft Server DynMap Port here}
 
 [MusixMatch]
 APP_ID: {Your MusixMatch App ID here}
+
+[Merriam-Webster]
+API_KEY: {Your Merriam-Webster App ID here}
